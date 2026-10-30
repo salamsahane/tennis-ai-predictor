@@ -18,7 +18,8 @@ import type { ModelPerformance } from '@/types/verdict.types';
 interface PredictionHistoryProps {
   performance: ModelPerformance[];
   totalPredictions: number;
-  verdictAccuracy: number;
+  verdictAccuracy: number | null;
+  completedPredictions: number;
 }
 
 interface ChartDatum {
@@ -47,6 +48,7 @@ export function PredictionHistory({
   performance,
   totalPredictions,
   verdictAccuracy,
+  completedPredictions,
 }: PredictionHistoryProps) {
   if (totalPredictions === 0) {
     return (
@@ -78,7 +80,7 @@ export function PredictionHistory({
         <CardTitle className="text-lg">Précision des modèles</CardTitle>
         <div className="text-right">
           <div className="text-primary font-mono text-2xl font-black tracking-tighter">
-            {verdictAccuracy}%
+            {verdictAccuracy === null ? 'en attente' : `${verdictAccuracy}%`}
           </div>
           <div className="text-muted-foreground text-[10px] font-semibold tracking-widest uppercase">
             Verdict Global
@@ -86,42 +88,48 @@ export function PredictionHistory({
         </div>
       </CardHeader>
       <CardContent className="pt-4">
-        <div className="h-[200px] w-full">
-          <ResponsiveContainer width="100%" height="100%">
-            <BarChart
-              data={chartData}
-              layout="vertical"
-              margin={{ top: 0, right: 30, left: 0, bottom: 0 }}
-            >
-              <CartesianGrid
-                strokeDasharray="3 3"
-                horizontal={false}
-                stroke="var(--border)"
-                opacity={0.5}
-              />
-              <XAxis type="number" domain={[0, 100]} hide />
-              <YAxis
-                dataKey="name"
-                type="category"
-                axisLine={false}
-                tickLine={false}
-                tick={{ fill: 'var(--foreground)', fontSize: 12, fontWeight: 500 }}
-                width={70}
-              />
-              <Tooltip
-                content={ChartTooltip}
-                cursor={{ fill: 'color-mix(in oklch, var(--muted) 50%, transparent)' }}
-              />
-              <Bar dataKey="accuracy" radius={[0, 4, 4, 0]} barSize={32}>
-                {chartData.map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={entry.fill} />
-                ))}
-              </Bar>
-            </BarChart>
-          </ResponsiveContainer>
-        </div>
+        {completedPredictions === 0 ? (
+          <div className="text-muted-foreground flex h-[200px] items-center justify-center text-sm">
+            Précision en attente des résultats réels.
+          </div>
+        ) : (
+          <div className="h-[200px] w-full">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart
+                data={chartData}
+                layout="vertical"
+                margin={{ top: 0, right: 30, left: 0, bottom: 0 }}
+              >
+                <CartesianGrid
+                  strokeDasharray="3 3"
+                  horizontal={false}
+                  stroke="var(--border)"
+                  opacity={0.5}
+                />
+                <XAxis type="number" domain={[0, 100]} hide />
+                <YAxis
+                  dataKey="name"
+                  type="category"
+                  axisLine={false}
+                  tickLine={false}
+                  tick={{ fill: 'var(--foreground)', fontSize: 12, fontWeight: 500 }}
+                  width={70}
+                />
+                <Tooltip
+                  content={ChartTooltip}
+                  cursor={{ fill: 'color-mix(in oklch, var(--muted) 50%, transparent)' }}
+                />
+                <Bar dataKey="accuracy" radius={[0, 4, 4, 0]} barSize={32}>
+                  {chartData.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={entry.fill} />
+                  ))}
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        )}
         <div className="text-muted-foreground mt-2 text-center text-xs">
-          Basé sur {totalPredictions} jeu(x) évalué(s)
+          Basé sur {completedPredictions} jeu(x) évalué(s)
         </div>
       </CardContent>
     </Card>

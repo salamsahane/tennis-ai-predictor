@@ -21,10 +21,8 @@ export default function MatchPage() {
 
   const { matchData, predictions, isPredicting, connectionStatus, error } =
     useMatchStream(fullMatchId);
-  const { performance, verdictAccuracy, totalPredictions } = usePredictionHistory(
-    predictions,
-    matchData,
-  );
+  const { performance, verdictAccuracy, totalPredictions, completedPredictions } =
+    usePredictionHistory(predictions);
   const { selectedModels, toggleModel, allModels, isHydrated } = useModelSelection();
 
   const latestPrediction = predictions.length > 0 ? predictions[0] : null;
@@ -123,6 +121,7 @@ export default function MatchPage() {
                 performance={performance}
                 totalPredictions={totalPredictions}
                 verdictAccuracy={verdictAccuracy}
+                completedPredictions={completedPredictions}
               />
               <GameHistory predictions={predictions} />
             </div>
