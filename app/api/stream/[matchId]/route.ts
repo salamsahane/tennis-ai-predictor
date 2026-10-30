@@ -28,6 +28,8 @@ export async function GET(request: NextRequest, context: { params: Promise<{ mat
   const selectedModels = parseModelsParam(request.nextUrl.searchParams.get('models'));
 
   const encoder = new TextEncoder();
+  // Set in start(); also run when the runtime cancels the body
+  let stopStream = () => {};
 
   const stream = new ReadableStream({
     start(controller) {
@@ -37,7 +39,12 @@ export async function GET(request: NextRequest, context: { params: Promise<{ mat
       // No-op once the stream is closed (client gone or match over)
       const send = (event: string, data: unknown) => {
         if (isClosed) return;
-        controller.enqueue(encoder.encode(formatSSE(event, data)));
+        try {
+          controller.enqueue(encoder.encode(formatSSE(event, data)));
+        } catch {
+          // Body was cancelled before abort fired
+          cleanup();
+        }
       };
 
       // Keep-alive heartbeat to prevent the connection from dropping
@@ -58,6 +65,8 @@ export async function GET(request: NextRequest, context: { params: Promise<{ mat
           // Already closed by the runtime
         }
       };
+
+      stopStream = cleanup;
 
       const schedulePoll = (delayMs: number) => {
         if (!isClosed) pollTimer = setTimeout(poll, delayMs);
@@ -119,6 +128,9 @@ export async function GET(request: NextRequest, context: { params: Promise<{ mat
       }
 
       void poll();
+    },
+    cancel() {
+      stopStream();
     },
   });
 

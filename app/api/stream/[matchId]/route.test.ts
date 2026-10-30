@@ -70,6 +70,16 @@ describe('GET /api/stream/[matchId]', () => {
     expect(vi.getTimerCount()).toBe(0);
   });
 
+  it('body cancel without abort cleans up', async () => {
+    mockedGetMatchData.mockReturnValue(new Promise(() => {}));
+    const { res } = open();
+    const body = (await res).body!;
+    await flush();
+
+    await body.getReader().cancel();
+    expect(vi.getTimerCount()).toBe(0);
+  });
+
   it('abort clears heartbeat', async () => {
     mockedGetMatchData.mockReturnValue(new Promise(() => {}));
     const { abort, res } = open();
