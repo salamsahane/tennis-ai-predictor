@@ -10,6 +10,7 @@ import {
   Tooltip,
   ResponsiveContainer,
   Cell,
+  type TooltipContentProps,
 } from 'recharts';
 import { MODEL_CONFIG } from '@/lib/utils';
 import type { ModelPerformance } from '@/types/verdict.types';
@@ -18,6 +19,28 @@ interface PredictionHistoryProps {
   performance: ModelPerformance[];
   totalPredictions: number;
   verdictAccuracy: number;
+}
+
+interface ChartDatum {
+  name: string;
+  accuracy: number;
+  correct: number;
+  total: number;
+  fill: string;
+}
+
+function ChartTooltip({ active, payload, label }: TooltipContentProps) {
+  if (!active || !payload?.length) return null;
+  const data = payload[0].payload as ChartDatum;
+  return (
+    <div className="bg-popover border-border rounded-lg border p-3 text-sm shadow-xl">
+      <p className="text-foreground mb-1 font-bold">{label}</p>
+      <p className="text-primary font-mono">{data.accuracy}% de précision</p>
+      <p className="text-muted-foreground mt-1 text-xs">
+        {data.correct} corrects sur {data.total} prédictions
+      </p>
+    </div>
+  );
 }
 
 export function PredictionHistory({
@@ -41,29 +64,13 @@ export function PredictionHistory({
   }
 
   // Format data for Recharts
-  const chartData = performance.map((p) => ({
+  const chartData: ChartDatum[] = performance.map((p) => ({
     name: MODEL_CONFIG[p.model].name,
     accuracy: p.accuracy,
     correct: p.correct,
     total: p.total,
     fill: MODEL_CONFIG[p.model].color,
   }));
-
-  const CustomTooltip = ({ active, payload, label }: any) => {
-    if (active && payload && payload.length) {
-      const data = payload[0].payload;
-      return (
-        <div className="bg-popover border-border rounded-lg border p-3 text-sm shadow-xl">
-          <p className="text-foreground mb-1 font-bold">{label}</p>
-          <p className="text-primary font-mono">{data.accuracy}% de précision</p>
-          <p className="text-muted-foreground mt-1 text-xs">
-            {data.correct} corrects sur {data.total} prédictions
-          </p>
-        </div>
-      );
-    }
-    return null;
-  };
 
   return (
     <Card className="bg-card/50 border-border backdrop-blur-sm">
@@ -89,7 +96,7 @@ export function PredictionHistory({
               <CartesianGrid
                 strokeDasharray="3 3"
                 horizontal={false}
-                stroke="hsl(var(--border))"
+                stroke="var(--border)"
                 opacity={0.5}
               />
               <XAxis type="number" domain={[0, 100]} hide />
@@ -98,10 +105,13 @@ export function PredictionHistory({
                 type="category"
                 axisLine={false}
                 tickLine={false}
-                tick={{ fill: 'hsl(var(--foreground))', fontSize: 12, fontWeight: 500 }}
+                tick={{ fill: 'var(--foreground)', fontSize: 12, fontWeight: 500 }}
                 width={70}
               />
-              <Tooltip content={<CustomTooltip />} cursor={{ fill: 'hsl(var(--muted)/0.5)' }} />
+              <Tooltip
+                content={ChartTooltip}
+                cursor={{ fill: 'color-mix(in oklch, var(--muted) 50%, transparent)' }}
+              />
               <Bar dataKey="accuracy" radius={[0, 4, 4, 0]} barSize={32}>
                 {chartData.map((entry, index) => (
                   <Cell key={`cell-${index}`} fill={entry.fill} />

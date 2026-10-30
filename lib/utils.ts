@@ -57,6 +57,10 @@ export const MODEL_CONFIG = {
     name: 'Claude',
     color: '#F97316',
     bgClass: 'bg-orange-500',
+    // Literal tint classes so Tailwind generates them
+    tint10: 'bg-orange-500/10',
+    tint15: 'bg-orange-500/15',
+    tint20: 'bg-orange-500/20',
     textClass: 'text-orange-400',
     icon: '🤖',
   },
@@ -64,6 +68,10 @@ export const MODEL_CONFIG = {
     name: 'GPT-4o',
     color: '#22C55E',
     bgClass: 'bg-green-500',
+    // Literal tint classes so Tailwind generates them
+    tint10: 'bg-green-500/10',
+    tint15: 'bg-green-500/15',
+    tint20: 'bg-green-500/20',
     textClass: 'text-green-400',
     icon: '🧠',
   },
@@ -71,6 +79,10 @@ export const MODEL_CONFIG = {
     name: 'Gemini',
     color: '#3B82F6',
     bgClass: 'bg-blue-500',
+    // Literal tint classes so Tailwind generates them
+    tint10: 'bg-blue-500/10',
+    tint15: 'bg-blue-500/15',
+    tint20: 'bg-blue-500/20',
     textClass: 'text-blue-400',
     icon: '✨',
   },

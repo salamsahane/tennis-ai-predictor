@@ -47,8 +47,8 @@
   --card-foreground: oklch(0.985 0 0);
   --popover: oklch(0.145 0 0);
   --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.985 0 0);
-  --primary-foreground: oklch(0.205 0 0);
+  --primary: oklch(0.623 0.17 143.5); /* Tennis Green */
+  --primary-foreground: oklch(0.985 0 0);
   --secondary: oklch(0.269 0 0);
   --secondary-foreground: oklch(0.985 0 0);
   --muted: oklch(0.269 0 0);
@@ -59,7 +59,7 @@
   --destructive-foreground: oklch(0.637 0.237 25.331);
   --border: oklch(0.269 0 0);
   --input: oklch(0.269 0 0);
-  --ring: oklch(0.439 0 0);
+  --ring: oklch(0.623 0.17 143.5);
   --chart-1: oklch(0.488 0.243 264.376);
   --chart-2: oklch(0.461 0.157 166.907);
   --chart-3: oklch(0.396 0.141 25.723);
@@ -150,13 +150,9 @@
   }
 }
 
-@keyframes bounce-slow {
-  0%,
+@keyframes shimmer {
   100% {
-    transform: translateY(0);
-  }
-  50% {
-    transform: translateY(-10px);
+    transform: translateX(100%);
   }
 }
 
@@ -166,10 +162,6 @@
 
 .animate-slide-in {
   animation: slide-in-bottom 0.4s ease-out forwards;
-}
-
-.animate-bounce-slow {
-  animation: bounce-slow 3s ease-in-out infinite;
 }
 
 /* Tennis court pattern background */

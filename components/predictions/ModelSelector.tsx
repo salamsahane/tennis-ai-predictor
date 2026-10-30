@@ -33,7 +33,7 @@ export function ModelSelector({ selectedModels, onToggle, allModels }: ModelSele
               onClick={() => onToggle(model)}
               className={`group relative flex cursor-pointer items-center gap-2 rounded-xl border px-3.5 py-2 text-sm font-medium backdrop-blur-sm transition-all duration-200 ease-out select-none ${
                 isActive
-                  ? `${config.bgClass}/15 border-current/30 shadow-md shadow-current/5`
+                  ? `${config.tint15} border-current/30 shadow-md shadow-current/5`
                   : 'bg-muted/30 border-border/30 text-muted-foreground hover:bg-muted/60 hover:border-border/50'
               } `}
               style={isActive ? { color: config.color } : undefined}

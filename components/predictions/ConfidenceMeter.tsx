@@ -36,7 +36,7 @@ export function ConfidenceMeter({ score, level }: ConfidenceMeterProps) {
       <div className="bg-muted/50 border-border/50 relative h-4 w-full overflow-hidden rounded-full border shadow-inner">
         {/* Animated fill */}
         <div
-          className={`absolute top-0 left-0 h-full ${bgClass} cubic-bezier(0.34, 1.56, 0.64, 1) transition-all duration-1000`}
+          className={`absolute top-0 left-0 h-full ${bgClass} transition-all duration-1000 ease-[cubic-bezier(0.34,1.56,0.64,1)]`}
           style={{ width: `${animatedScore}%` }}
         >
           {/* Shine effect */}
@@ -51,14 +51,6 @@ export function ConfidenceMeter({ score, level }: ConfidenceMeterProps) {
         <span>75</span>
         <span>100</span>
       </div>
-
-      <style jsx>{`
-        @keyframes shimmer {
-          100% {
-            transform: translateX(100%);
-          }
-        }
-      `}</style>
     </div>
   );
 }

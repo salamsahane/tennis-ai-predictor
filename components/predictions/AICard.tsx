@@ -44,7 +44,7 @@ export function AICard({ model, prediction }: AICardProps) {
         <CardContent className="flex items-center justify-between p-4 opacity-50">
           <div className="flex items-center gap-3">
             <div
-              className={`h-8 w-8 rounded-full ${config.bgClass}/20 flex items-center justify-center text-lg`}
+              className={`h-8 w-8 rounded-full ${config.tint20} flex items-center justify-center text-lg`}
             >
               {config.icon}
             </div>
@@ -69,7 +69,7 @@ export function AICard({ model, prediction }: AICardProps) {
         <div className="flex items-start justify-between gap-4">
           <div className="flex items-start gap-3">
             <div
-              className={`h-10 w-10 shrink-0 rounded-xl ${config.bgClass}/10 flex items-center justify-center text-xl`}
+              className={`h-10 w-10 shrink-0 rounded-xl ${config.tint10} flex items-center justify-center text-xl`}
             >
               {config.icon}
             </div>

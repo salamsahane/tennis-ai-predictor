@@ -55,7 +55,7 @@ export function PredictionPanel({
             return (
               <div
                 key={model}
-                className={`flex items-center gap-2 ${config.bgClass}/10 ${config.textClass} rounded-full px-3 py-1.5 text-xs font-medium`}
+                className={`flex items-center gap-2 ${config.tint10} ${config.textClass} rounded-full px-3 py-1.5 text-xs font-medium`}
               >
                 <Loader2 className="h-3 w-3 animate-spin" />
                 {config.name}
