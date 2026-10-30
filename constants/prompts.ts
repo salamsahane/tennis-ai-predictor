@@ -68,9 +68,9 @@ QUESTION : Qui va remporter le prochain jeu (jeu n°{next_game_number}) ?
 
 Réponds UNIQUEMENT avec ce JSON :
 {
-  "predicted_winner": "{player_home | player_away}",
+  "predicted_winner": "{player_choice}",
   "win_probability": <nombre entre 0.5 et 1.0>,
-  "serving_player": "{player_home | player_away}",
+  "serving_player": "{player_choice}",
   "is_break_predicted": <true | false>,
   "key_factors": [
     { "factor": "Nom du facteur", "value": "Valeur observée", "impact": "positive | negative | neutral" }

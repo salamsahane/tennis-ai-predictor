@@ -24,7 +24,6 @@ function buildScoreHistory(
     .map((set, idx) => {
       const isCurrentSet = idx === periodScores.length - 1;
       const label = isCurrentSet ? `Set ${set.number} (en cours)` : `Set ${set.number}`;
-      const winner = set.home > set.away ? homeName : set.home < set.away ? awayName : 'Égalité';
       const score =
         set.home > set.away
           ? `${homeName} ${set.home} - ${set.away} ${awayName}`
@@ -175,6 +174,9 @@ export function buildPrompt(matchData: MatchData): string {
 
     // Away player stats
     player_away: players.away.name,
+
+    // JSON answer example: the two valid winner names
+    player_choice: `${players.home.name} | ${players.away.name}`,
     aces_away: awayStats.aces,
     df_away: awayStats.doubleFaults,
     first_serve_in_away: awayStats.firstServePercentage,
@@ -192,7 +194,7 @@ export function buildPrompt(matchData: MatchData): string {
 
   let prompt = USER_PROMPT_TEMPLATE;
   for (const [key, value] of Object.entries(replacements)) {
-    prompt = prompt.replace(new RegExp(`\\{${key}\\}`, 'g'), String(value));
+    prompt = prompt.replace(new RegExp(`\\{${key}\\}`, 'g'), () => String(value));
   }
 
   return prompt;
