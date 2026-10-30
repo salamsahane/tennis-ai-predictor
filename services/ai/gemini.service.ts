@@ -4,6 +4,7 @@ import type { MatchData } from '@/types/tennis.types';
 import type { AIPrediction, AIRawResponse } from '@/types/ai.types';
 import { SYSTEM_PROMPT } from '@/constants/prompts';
 import { safeJsonParse } from '@/lib/utils';
+import { PROVIDER_MODEL_IDS } from '@/constants/models';
 
 const genAI = process.env.GEMINI_API_KEY
   ? new GoogleGenerativeAI(process.env.GEMINI_API_KEY)
@@ -32,7 +33,7 @@ export async function getGeminiPrediction(
 
   try {
     const model = genAI.getGenerativeModel({
-      model: 'gemini-3.5-flash',
+      model: PROVIDER_MODEL_IDS.gemini,
       systemInstruction: SYSTEM_PROMPT,
       generationConfig: {
         responseMimeType: 'application/json',

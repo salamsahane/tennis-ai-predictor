@@ -4,6 +4,7 @@ import type { MatchData } from '@/types/tennis.types';
 import type { AIPrediction, AIRawResponse } from '@/types/ai.types';
 import { SYSTEM_PROMPT } from '@/constants/prompts';
 import { safeJsonParse } from '@/lib/utils';
+import { PROVIDER_MODEL_IDS } from '@/constants/models';
 
 // We initialize the client but it won't throw until used if key is missing
 const client = process.env.ANTHROPIC_API_KEY
@@ -33,14 +34,22 @@ export async function getClaudePrediction(
 
   try {
     const response = await client.messages.create({
-      model: 'claude-3-5-sonnet-20240620', // Use newer Claude 3.5 Sonnet
-      max_tokens: 1024,
+      model: PROVIDER_MODEL_IDS.claude,
+      // Room for adaptive thinking plus the JSON answer
+      max_tokens: 4096,
+      // Low effort keeps latency inside the orchestrator timeout
+      output_config: { effort: 'low' },
       system: SYSTEM_PROMPT,
       messages: [{ role: 'user', content: prompt }],
-      temperature: 0.3,
     });
 
-    const text = response.content[0].type === 'text' ? response.content[0].text : '';
+    if (response.stop_reason === 'refusal') {
+      throw new Error('Claude refused the request');
+    }
+
+    // Thinking blocks may come before the answer, so find the text block
+    const textBlock = response.content.find((block) => block.type === 'text');
+    const text = textBlock?.type === 'text' ? textBlock.text : '';
     const rawData = safeJsonParse<AIRawResponse>(text);
 
     if (!rawData) {

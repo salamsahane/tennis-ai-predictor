@@ -4,6 +4,7 @@ import type { MatchData } from '@/types/tennis.types';
 import type { AIPrediction, AIRawResponse } from '@/types/ai.types';
 import { SYSTEM_PROMPT } from '@/constants/prompts';
 import { safeJsonParse } from '@/lib/utils';
+import { PROVIDER_MODEL_IDS } from '@/constants/models';
 
 const client = process.env.OPENAI_API_KEY
   ? new OpenAI({ apiKey: process.env.OPENAI_API_KEY })
@@ -32,7 +33,7 @@ export async function getGPTPrediction(
 
   try {
     const response = await client.chat.completions.create({
-      model: 'gpt-4o',
+      model: PROVIDER_MODEL_IDS.gpt4o,
       messages: [
         { role: 'system', content: SYSTEM_PROMPT },
         { role: 'user', content: prompt },
