@@ -24,7 +24,7 @@ interface PredictionHistoryProps {
 
 interface ChartDatum {
   name: string;
-  accuracy: number;
+  accuracy: number | null;
   correct: number;
   total: number;
   fill: string;
@@ -36,7 +36,9 @@ function ChartTooltip({ active, payload, label }: TooltipContentProps) {
   return (
     <div className="bg-popover border-border rounded-lg border p-3 text-sm shadow-xl">
       <p className="text-foreground mb-1 font-bold">{label}</p>
-      <p className="text-primary font-mono">{data.accuracy}% de précision</p>
+      <p className="text-primary font-mono">
+        {data.accuracy === null ? 'Précision en attente' : `${data.accuracy}% de précision`}
+      </p>
       <p className="text-muted-foreground mt-1 text-xs">
         {data.correct} corrects sur {data.total} prédictions
       </p>

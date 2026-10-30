@@ -67,7 +67,9 @@ describe('prediction stats', () => {
         was_correct: true,
       }),
     ];
-    expect(computeModelPerformance(history).every((m) => m.total === 0)).toBe(true);
+    const perf = computeModelPerformance(history);
+    expect(perf.every((m) => m.total === 0)).toBe(true);
+    expect(perf.every((m) => m.accuracy === null)).toBe(true);
   });
 
   it('verdict accuracy from was_correct', () => {

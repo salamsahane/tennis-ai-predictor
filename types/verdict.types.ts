@@ -26,7 +26,7 @@ export interface ModelPerformance {
   model: import('./ai.types').AIModel;
   correct: number;
   total: number;
-  accuracy: number;
+  accuracy: number | null; // null until the model has an evaluated prediction
 }
 
 export interface Weight {

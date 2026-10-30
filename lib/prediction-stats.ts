@@ -5,12 +5,15 @@ function completed(history: PredictionEvent[]): PredictionEvent[] {
   return history.filter((p) => p.actual_winner !== undefined);
 }
 
-/** Per-model accuracy over completed events. Errored predictions are not counted. */
+/**
+ * Per-model accuracy over completed events. Errored predictions are not counted;
+ * a model with nothing evaluated has null accuracy (pending), not 0%.
+ */
 export function computeModelPerformance(history: PredictionEvent[]): ModelPerformance[] {
   const models: ModelPerformance[] = [
-    { model: 'claude', correct: 0, total: 0, accuracy: 0 },
-    { model: 'gpt4o', correct: 0, total: 0, accuracy: 0 },
-    { model: 'gemini', correct: 0, total: 0, accuracy: 0 },
+    { model: 'claude', correct: 0, total: 0, accuracy: null },
+    { model: 'gpt4o', correct: 0, total: 0, accuracy: null },
+    { model: 'gemini', correct: 0, total: 0, accuracy: null },
   ];
 
   for (const event of completed(history)) {
@@ -25,7 +28,7 @@ export function computeModelPerformance(history: PredictionEvent[]): ModelPerfor
   }
 
   for (const m of models) {
-    m.accuracy = m.total > 0 ? Math.round((m.correct / m.total) * 100) : 0;
+    m.accuracy = m.total > 0 ? Math.round((m.correct / m.total) * 100) : null;
   }
   return models;
 }
