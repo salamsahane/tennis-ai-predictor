@@ -23,6 +23,7 @@ export function useModelSelection() {
         // Validate: ensure at least one model, and all values are valid
         const valid = parsed.filter((m) => ALL_MODELS.includes(m));
         if (valid.length > 0) {
+          // eslint-disable-next-line react-hooks/set-state-in-effect -- localStorage is read after mount to keep SSR markup stable; moves to useSyncExternalStore in sub-project 3
           setSelectedModels(valid);
         }
       }
@@ -53,20 +54,9 @@ export function useModelSelection() {
     });
   }, []);
 
-  const selectAll = useCallback(() => {
-    setSelectedModels([...ALL_MODELS]);
-  }, []);
-
-  const isSelected = useCallback(
-    (model: AIModel) => selectedModels.includes(model),
-    [selectedModels],
-  );
-
   return {
     selectedModels,
     toggleModel,
-    selectAll,
-    isSelected,
     allModels: ALL_MODELS,
     isHydrated,
   };

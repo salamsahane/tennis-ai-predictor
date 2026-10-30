@@ -28,8 +28,8 @@ export default function Home() {
           </h1>
 
           <p className="text-muted-foreground mx-auto max-w-2xl text-lg leading-relaxed md:text-xl">
-            L'intelligence artificielle au service du tennis. Retrouvez des prédictions en temps
-            réel pour le prochain jeu basées sur l'analyse de 3 modèles LLM (Claude, GPT-4o,
+            L’intelligence artificielle au service du tennis. Retrouvez des prédictions en temps
+            réel pour le prochain jeu basées sur l’analyse de 3 modèles LLM (Claude, GPT-4o,
             Gemini).
           </p>
         </div>

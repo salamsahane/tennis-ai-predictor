@@ -75,7 +75,7 @@ export function PredictionPanel({
         </div>
         <h3 className="text-foreground text-lg font-medium">En attente de la fin du jeu</h3>
         <p className="text-muted-foreground max-w-sm text-sm">
-          Les modèles d'IA analyseront automatiquement les statistiques à la fin du jeu en cours
+          Les modèles d’IA analyseront automatiquement les statistiques à la fin du jeu en cours
           (Jeu n°{nextGameNum}).
         </p>
       </div>

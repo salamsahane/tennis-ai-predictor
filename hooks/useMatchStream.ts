@@ -18,6 +18,7 @@ export function useMatchStream(matchId: string | null) {
   useEffect(() => {
     if (!matchId) return;
 
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- resets status when matchId changes, before subscribing to the EventSource; moves to a store in sub-project 3
     setConnectionStatus('connecting');
     setError(null);
     let eventSource: EventSource | null = null;

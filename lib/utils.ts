@@ -88,11 +88,6 @@ export const MODEL_CONFIG = {
   },
 } as const;
 
-/** Delay utility */
-export function delay(ms: number): Promise<void> {
-  return new Promise((resolve) => setTimeout(resolve, ms));
-}
-
 /** Safe JSON parse */
 export function safeJsonParse<T>(text: string): T | null {
   try {

@@ -28,7 +28,7 @@ export function AICard({ model, prediction }: AICardProps) {
               <div className="text-muted-foreground font-medium">{config.name}</div>
               <div className="text-muted-foreground/70 flex items-center gap-1 text-xs">
                 <Ban className="h-3 w-3" />
-                Désactivé par l'utilisateur
+                Désactivé par l’utilisateur
               </div>
             </div>
           </div>

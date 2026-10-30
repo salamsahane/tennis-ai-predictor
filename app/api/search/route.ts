@@ -1,4 +1,5 @@
 import { type NextRequest } from 'next/server';
+import type { Redis } from '@upstash/redis';
 import { z } from 'zod';
 import { searchLiveMatches } from '@/services/tennis/sportradar.client';
 import { redis, isRealRedis } from '@/lib/redis';
@@ -17,7 +18,7 @@ export async function GET(request: NextRequest) {
     if (isRealRedis() && !ratelimit) {
       // Create ratelimit instance lazily to ensure redis is initialized
       ratelimit = new Ratelimit({
-        redis: redis as any, // Cast because Upstash Ratelimit expects its own Redis type
+        redis: redis as Redis, // Safe: isRealRedis() guarantees the Upstash client
         limiter: Ratelimit.slidingWindow(10, '1m'),
         analytics: false,
       });

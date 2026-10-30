@@ -37,7 +37,7 @@ export default function MatchPage() {
             href="/"
             className="bg-background border-border hover:bg-muted inline-flex items-center justify-center rounded-lg border px-4 py-2 transition-colors"
           >
-            <ArrowLeft className="mr-2 h-4 w-4" /> Retour à l'accueil
+            <ArrowLeft className="mr-2 h-4 w-4" /> Retour à l’accueil
           </Link>
         </div>
       </div>
