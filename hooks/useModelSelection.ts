@@ -59,7 +59,7 @@ export function useModelSelection() {
 
   const isSelected = useCallback(
     (model: AIModel) => selectedModels.includes(model),
-    [selectedModels]
+    [selectedModels],
   );
 
   return {

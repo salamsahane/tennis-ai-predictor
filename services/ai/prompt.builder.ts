@@ -14,22 +14,25 @@ import type { MatchData, PeriodScore } from '@/types/tennis.types';
 function buildScoreHistory(
   periodScores: PeriodScore[],
   homeName: string,
-  awayName: string
+  awayName: string,
 ): string {
   if (periodScores.length === 0) {
     return '  Aucun set terminé pour le moment (début de match).';
   }
 
-  return periodScores.map((set, idx) => {
-    const isCurrentSet = idx === periodScores.length - 1;
-    const label = isCurrentSet ? `Set ${set.number} (en cours)` : `Set ${set.number}`;
-    const winner = set.home > set.away ? homeName : set.home < set.away ? awayName : 'Égalité';
-    const score = set.home > set.away
-      ? `${homeName} ${set.home} - ${set.away} ${awayName}`
-      : `${awayName} ${set.away} - ${set.home} ${homeName}`;
-    const tieBreakNote = set.tieBreak ? ' (tiebreak)' : '';
-    return `  ${label} : ${score}${tieBreakNote}`;
-  }).join('\n');
+  return periodScores
+    .map((set, idx) => {
+      const isCurrentSet = idx === periodScores.length - 1;
+      const label = isCurrentSet ? `Set ${set.number} (en cours)` : `Set ${set.number}`;
+      const winner = set.home > set.away ? homeName : set.home < set.away ? awayName : 'Égalité';
+      const score =
+        set.home > set.away
+          ? `${homeName} ${set.home} - ${set.away} ${awayName}`
+          : `${awayName} ${set.away} - ${set.home} ${homeName}`;
+      const tieBreakNote = set.tieBreak ? ' (tiebreak)' : '';
+      return `  ${label} : ${score}${tieBreakNote}`;
+    })
+    .join('\n');
 }
 
 /**
@@ -45,11 +48,17 @@ function buildMomentumAnalysis(matchData: MatchData): string {
   const homeLast10 = home.pointsWonLast10;
   const awayLast10 = away.pointsWonLast10;
   if (homeLast10 > awayLast10) {
-    lines.push(`- Momentum récent : ${players.home.name} domine les 10 derniers points (${homeLast10} vs ${awayLast10})`);
+    lines.push(
+      `- Momentum récent : ${players.home.name} domine les 10 derniers points (${homeLast10} vs ${awayLast10})`,
+    );
   } else if (awayLast10 > homeLast10) {
-    lines.push(`- Momentum récent : ${players.away.name} domine les 10 derniers points (${awayLast10} vs ${homeLast10})`);
+    lines.push(
+      `- Momentum récent : ${players.away.name} domine les 10 derniers points (${awayLast10} vs ${homeLast10})`,
+    );
   } else {
-    lines.push(`- Momentum récent : équilibré sur les 10 derniers points (${homeLast10}-${awayLast10})`);
+    lines.push(
+      `- Momentum récent : équilibré sur les 10 derniers points (${homeLast10}-${awayLast10})`,
+    );
   }
 
   // Total points balance
@@ -57,23 +66,31 @@ function buildMomentumAnalysis(matchData: MatchData): string {
   const totalAway = away.totalPointsWon;
   if (totalHome + totalAway > 0) {
     const homePct = Math.round((totalHome / (totalHome + totalAway)) * 100);
-    lines.push(`- Balance globale des points : ${players.home.name} ${homePct}% - ${100 - homePct}% ${players.away.name}`);
+    lines.push(
+      `- Balance globale des points : ${players.home.name} ${homePct}% - ${100 - homePct}% ${players.away.name}`,
+    );
   }
 
   // Winners vs Unforced errors ratio
   const homeRatio = home.winners - home.unforcedErrors;
   const awayRatio = away.winners - away.unforcedErrors;
-  lines.push(`- Ratio Winners-Fautes : ${players.home.name} ${homeRatio >= 0 ? '+' : ''}${homeRatio} | ${players.away.name} ${awayRatio >= 0 ? '+' : ''}${awayRatio}`);
+  lines.push(
+    `- Ratio Winners-Fautes : ${players.home.name} ${homeRatio >= 0 ? '+' : ''}${homeRatio} | ${players.away.name} ${awayRatio >= 0 ? '+' : ''}${awayRatio}`,
+  );
 
   // Break points pressure
   if (home.breakPointsTotal > 0 || away.breakPointsTotal > 0) {
-    const homeBpPct = home.breakPointsTotal > 0
-      ? Math.round((home.breakPointsWon / home.breakPointsTotal) * 100)
-      : 0;
-    const awayBpPct = away.breakPointsTotal > 0
-      ? Math.round((away.breakPointsWon / away.breakPointsTotal) * 100)
-      : 0;
-    lines.push(`- Conversion en break : ${players.home.name} ${homeBpPct}% (${home.breakPointsWon}/${home.breakPointsTotal}) | ${players.away.name} ${awayBpPct}% (${away.breakPointsWon}/${away.breakPointsTotal})`);
+    const homeBpPct =
+      home.breakPointsTotal > 0
+        ? Math.round((home.breakPointsWon / home.breakPointsTotal) * 100)
+        : 0;
+    const awayBpPct =
+      away.breakPointsTotal > 0
+        ? Math.round((away.breakPointsWon / away.breakPointsTotal) * 100)
+        : 0;
+    lines.push(
+      `- Conversion en break : ${players.home.name} ${homeBpPct}% (${home.breakPointsWon}/${home.breakPointsTotal}) | ${players.away.name} ${awayBpPct}% (${away.breakPointsWon}/${away.breakPointsTotal})`,
+    );
   }
 
   // Set progression trend
@@ -82,11 +99,17 @@ function buildMomentumAnalysis(matchData: MatchData): string {
     const lastCompleted = periodScores[periodScores.length - 2];
     const current = periodScores[periodScores.length - 1];
     if (lastCompleted && current) {
-      const prevWinner = lastCompleted.home > lastCompleted.away ? players.home.name : players.away.name;
-      const currentLeader = current.home > current.away ? players.home.name
-        : current.away > current.home ? players.away.name
-        : 'Aucun';
-      lines.push(`- Dernier set gagné par : ${prevWinner} | Meneur du set actuel : ${currentLeader}`);
+      const prevWinner =
+        lastCompleted.home > lastCompleted.away ? players.home.name : players.away.name;
+      const currentLeader =
+        current.home > current.away
+          ? players.home.name
+          : current.away > current.home
+            ? players.away.name
+            : 'Aucun';
+      lines.push(
+        `- Dernier set gagné par : ${prevWinner} | Meneur du set actuel : ${currentLeader}`,
+      );
     }
   }
 

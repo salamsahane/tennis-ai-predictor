@@ -6,16 +6,16 @@ import { SYSTEM_PROMPT } from '@/constants/prompts';
 import { safeJsonParse } from '@/lib/utils';
 
 // We initialize the client but it won't throw until used if key is missing
-const client = process.env.ANTHROPIC_API_KEY 
+const client = process.env.ANTHROPIC_API_KEY
   ? new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
   : null;
 
 export async function getClaudePrediction(
   matchData: MatchData,
-  prompt: string
+  prompt: string,
 ): Promise<AIPrediction> {
   const startTime = Date.now();
-  
+
   if (!client) {
     return {
       model: 'claude',
@@ -42,7 +42,7 @@ export async function getClaudePrediction(
 
     const text = response.content[0].type === 'text' ? response.content[0].text : '';
     const rawData = safeJsonParse<AIRawResponse>(text);
-    
+
     if (!rawData) {
       throw new Error('Failed to parse Claude JSON response');
     }

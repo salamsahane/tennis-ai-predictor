@@ -39,7 +39,7 @@ export async function GET(request: NextRequest) {
     if (!validationResult.success) {
       return Response.json(
         { error: 'Query must be between 3 and 100 characters' },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -53,9 +53,6 @@ export async function GET(request: NextRequest) {
     });
   } catch (error) {
     console.error('[API] Search failed:', error);
-    return Response.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    );
+    return Response.json({ error: 'Internal server error' }, { status: 500 });
   }
 }

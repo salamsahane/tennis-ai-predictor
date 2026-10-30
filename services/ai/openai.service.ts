@@ -11,7 +11,7 @@ const client = process.env.OPENAI_API_KEY
 
 export async function getGPTPrediction(
   matchData: MatchData,
-  prompt: string
+  prompt: string,
 ): Promise<AIPrediction> {
   const startTime = Date.now();
 

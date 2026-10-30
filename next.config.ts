@@ -1,11 +1,11 @@
-import type { NextConfig } from "next";
+import type { NextConfig } from 'next';
 
 const nextConfig: NextConfig = {
   // Ensure we can use these server-side only packages in edge/serverless functions
   serverExternalPackages: ['@anthropic-ai/sdk', 'openai', '@google/generative-ai'],
-  
+
   turbopack: {
-    root: process.cwd()
+    root: process.cwd(),
   }, // Silence the turbopack warning
 };
 

@@ -10,7 +10,9 @@ export function useMatchStream(matchId: string | null) {
   const [matchData, setMatchData] = useState<MatchData | null>(null);
   const [predictions, setPredictions] = useState<PredictionEvent[]>([]);
   const [isPredicting, setIsPredicting] = useState(false);
-  const [connectionStatus, setConnectionStatus] = useState<'connecting' | 'connected' | 'disconnected'>('disconnected');
+  const [connectionStatus, setConnectionStatus] = useState<
+    'connecting' | 'connected' | 'disconnected'
+  >('disconnected');
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -30,7 +32,9 @@ export function useMatchStream(matchId: string | null) {
         const valid = parsed.filter((m) => ALL_MODELS.includes(m));
         if (valid.length > 0) models = valid;
       }
-    } catch { /* defaults to all */ }
+    } catch {
+      /* defaults to all */
+    }
 
     const modelsParam = models.join(',');
 
@@ -57,8 +61,10 @@ export function useMatchStream(matchId: string | null) {
         if (!isMounted) return;
         const result = JSON.parse(e.data) as PredictionEvent;
         // Check if we already have this prediction (prevent duplicates on reconnect)
-        setPredictions(prev => {
-          const exists = prev.some(p => p.game_number === result.game_number && p.set_number === result.set_number);
+        setPredictions((prev) => {
+          const exists = prev.some(
+            (p) => p.game_number === result.game_number && p.set_number === result.set_number,
+          );
           if (exists) return prev;
           return [result, ...prev]; // Prepend new predictions
         });
@@ -74,7 +80,7 @@ export function useMatchStream(matchId: string | null) {
 
       eventSource.addEventListener('error', (e) => {
         if (!isMounted) return;
-        
+
         // Custom error events from the server
         try {
           // If e.data exists, it's a custom error event we dispatched from the server

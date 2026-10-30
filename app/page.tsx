@@ -9,37 +9,37 @@ export default function Home() {
   const { selectedModels, toggleModel, allModels, isHydrated } = useModelSelection();
 
   return (
-    <main className="min-h-screen bg-court-pattern flex flex-col items-center justify-center p-4 md:p-8 relative overflow-hidden">
-      
+    <main className="bg-court-pattern relative flex min-h-screen flex-col items-center justify-center overflow-hidden p-4 md:p-8">
       {/* Background decoration */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-primary/5 rounded-full blur-[100px] pointer-events-none" />
-      <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-[var(--color-tennis-ball)]/5 rounded-full blur-[80px] pointer-events-none" />
+      <div className="bg-primary/5 pointer-events-none absolute top-1/2 left-1/2 h-[800px] w-[800px] -translate-x-1/2 -translate-y-1/2 rounded-full blur-[100px]" />
+      <div className="pointer-events-none absolute top-0 right-0 h-[400px] w-[400px] rounded-full bg-[var(--color-tennis-ball)]/5 blur-[80px]" />
 
-      <div className="z-10 w-full max-w-4xl mx-auto space-y-12">
-        
-        <div className="text-center space-y-6 animate-slide-in">
-          <div className="inline-flex items-center justify-center p-3 bg-primary/10 rounded-2xl mb-4 border border-primary/20 backdrop-blur-sm">
+      <div className="z-10 mx-auto w-full max-w-4xl space-y-12">
+        <div className="animate-slide-in space-y-6 text-center">
+          <div className="bg-primary/10 border-primary/20 mb-4 inline-flex items-center justify-center rounded-2xl border p-3 backdrop-blur-sm">
             <div className="relative">
-              <Sparkles className="w-8 h-8 text-primary animate-pulse-subtle" />
-              <Activity className="w-4 h-4 text-[var(--color-tennis-ball)] absolute -bottom-1 -right-1" />
+              <Sparkles className="text-primary animate-pulse-subtle h-8 w-8" />
+              <Activity className="absolute -right-1 -bottom-1 h-4 w-4 text-[var(--color-tennis-ball)]" />
             </div>
           </div>
-          
-          <h1 className="text-5xl md:text-7xl font-black tracking-tighter bg-clip-text text-transparent bg-gradient-to-r from-foreground to-foreground/70 drop-shadow-sm">
+
+          <h1 className="from-foreground to-foreground/70 bg-gradient-to-r bg-clip-text text-5xl font-black tracking-tighter text-transparent drop-shadow-sm md:text-7xl">
             Tennis AI <span className="text-primary">Predictor</span>
           </h1>
-          
-          <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed">
-            L'intelligence artificielle au service du tennis. Retrouvez des prédictions en temps réel pour le prochain jeu basées sur l'analyse de 3 modèles LLM (Claude, GPT-4o, Gemini).
+
+          <p className="text-muted-foreground mx-auto max-w-2xl text-lg leading-relaxed md:text-xl">
+            L'intelligence artificielle au service du tennis. Retrouvez des prédictions en temps
+            réel pour le prochain jeu basées sur l'analyse de 3 modèles LLM (Claude, GPT-4o,
+            Gemini).
           </p>
         </div>
 
-        <div className="bg-card/40 backdrop-blur-md p-6 md:p-8 rounded-3xl border border-white/5 shadow-2xl relative space-y-6">
-          <div className="absolute inset-0 bg-gradient-to-b from-white/5 to-transparent rounded-3xl pointer-events-none" />
-          
+        <div className="bg-card/40 relative space-y-6 rounded-3xl border border-white/5 p-6 shadow-2xl backdrop-blur-md md:p-8">
+          <div className="pointer-events-none absolute inset-0 rounded-3xl bg-gradient-to-b from-white/5 to-transparent" />
+
           {/* Model Selector */}
           {isHydrated && (
-            <div className="relative z-10 animate-slide-in">
+            <div className="animate-slide-in relative z-10">
               <ModelSelector
                 selectedModels={selectedModels}
                 onToggle={toggleModel}
@@ -52,13 +52,11 @@ export default function Home() {
             <PlayerSearch />
           </div>
         </div>
-
       </div>
-      
-      <footer className="absolute bottom-6 text-center text-sm text-muted-foreground w-full">
+
+      <footer className="text-muted-foreground absolute bottom-6 w-full text-center text-sm">
         <p>Propulsé par SportRadar & Multi-Agent AI</p>
       </footer>
-
     </main>
   );
 }

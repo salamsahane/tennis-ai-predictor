@@ -7,10 +7,7 @@ import type { MatchData } from '@/types/tennis.types';
 /**
  * Detect if a game just ended by comparing total games count with previous state
  */
-export async function detectGameEnd(
-  currentData: MatchData,
-  matchId: string
-): Promise<boolean> {
+export async function detectGameEnd(currentData: MatchData, matchId: string): Promise<boolean> {
   const previousKey = `match:${matchId}:lastGamesCount`;
   const previousCount = await redis.get(previousKey);
 
@@ -29,10 +26,7 @@ export async function detectGameEnd(
  * Get the total number of games played across all sets
  */
 export function getTotalGamesPlayed(data: MatchData): number {
-  return data.score.periodScores.reduce(
-    (sum, set) => sum + set.home + set.away,
-    0
-  );
+  return data.score.periodScores.reduce((sum, set) => sum + set.home + set.away, 0);
 }
 
 /**

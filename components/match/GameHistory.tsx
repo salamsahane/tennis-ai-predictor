@@ -14,19 +14,26 @@ export function GameHistory({ predictions }: GameHistoryProps) {
 
   return (
     <Card className="bg-card/30 border-border">
-      <CardHeader className="py-3 px-4">
-        <CardTitle className="text-sm font-medium text-muted-foreground">Historique des jeux</CardTitle>
+      <CardHeader className="px-4 py-3">
+        <CardTitle className="text-muted-foreground text-sm font-medium">
+          Historique des jeux
+        </CardTitle>
       </CardHeader>
-      <CardContent className="p-0 max-h-[300px] overflow-y-auto">
+      <CardContent className="max-h-[300px] overflow-y-auto p-0">
         <div className="flex flex-col">
           {predictions.map((p, idx) => (
-            <div key={`${p.set_number}-${p.game_number}`} className="flex items-center justify-between p-3 border-b border-border/50 hover:bg-muted/20 text-sm">
-              <div className="font-mono text-muted-foreground">
+            <div
+              key={`${p.set_number}-${p.game_number}`}
+              className="border-border/50 hover:bg-muted/20 flex items-center justify-between border-b p-3 text-sm"
+            >
+              <div className="text-muted-foreground font-mono">
                 Set {p.set_number}, Jeu {p.game_number}
               </div>
               <div className="flex items-center gap-2">
-                <span className="text-xs text-muted-foreground">Vainqueur prédit :</span>
-                <span className="font-medium text-primary">{p.verdict.predicted_winner.split(' ').pop()}</span>
+                <span className="text-muted-foreground text-xs">Vainqueur prédit :</span>
+                <span className="text-primary font-medium">
+                  {p.verdict.predicted_winner.split(' ').pop()}
+                </span>
               </div>
             </div>
           ))}

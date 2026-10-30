@@ -19,10 +19,10 @@ export function useMatchSearch(initialQuery: string = '') {
 
   // Fetch only when query is >= 3 chars
   const shouldFetch = debouncedQuery.length >= 3;
-  
-  const { data, error, isLoading } = useSWR<{ matches: MatchSearchResult[], total: number }>(
+
+  const { data, error, isLoading } = useSWR<{ matches: MatchSearchResult[]; total: number }>(
     shouldFetch ? `/api/search?q=${encodeURIComponent(debouncedQuery)}` : null,
-    fetcher
+    fetcher,
   );
 
   return {

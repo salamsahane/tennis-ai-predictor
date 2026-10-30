@@ -19,20 +19,27 @@ export default function MatchPage() {
   // SportRadar IDs use a specific format: sr:sport_event:123456
   const fullMatchId = `sr:sport_event:${matchId}`;
 
-  const { matchData, predictions, isPredicting, connectionStatus, error } = useMatchStream(fullMatchId);
-  const { performance, verdictAccuracy, totalPredictions } = usePredictionHistory(predictions, matchData);
+  const { matchData, predictions, isPredicting, connectionStatus, error } =
+    useMatchStream(fullMatchId);
+  const { performance, verdictAccuracy, totalPredictions } = usePredictionHistory(
+    predictions,
+    matchData,
+  );
   const { selectedModels, toggleModel, allModels, isHydrated } = useModelSelection();
 
   const latestPrediction = predictions.length > 0 ? predictions[0] : null;
 
   if (error) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center p-4 bg-court-pattern">
-        <div className="bg-destructive/10 text-destructive p-8 rounded-2xl border border-destructive/20 text-center max-w-md animate-slide-in">
-          <h2 className="text-2xl font-bold mb-4">Erreur</h2>
+      <div className="bg-court-pattern flex min-h-screen flex-col items-center justify-center p-4">
+        <div className="bg-destructive/10 text-destructive border-destructive/20 animate-slide-in max-w-md rounded-2xl border p-8 text-center">
+          <h2 className="mb-4 text-2xl font-bold">Erreur</h2>
           <p className="mb-6">{error}</p>
-          <Link href="/" className="inline-flex items-center justify-center px-4 py-2 bg-background border border-border rounded-lg hover:bg-muted transition-colors">
-            <ArrowLeft className="w-4 h-4 mr-2" /> Retour à l'accueil
+          <Link
+            href="/"
+            className="bg-background border-border hover:bg-muted inline-flex items-center justify-center rounded-lg border px-4 py-2 transition-colors"
+          >
+            <ArrowLeft className="mr-2 h-4 w-4" /> Retour à l'accueil
           </Link>
         </div>
       </div>
@@ -41,24 +48,27 @@ export default function MatchPage() {
 
   if (!matchData) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center p-4 bg-court-pattern">
-        <Loader2 className="w-12 h-12 text-primary animate-spin mb-4" />
-        <h2 className="text-xl font-medium text-foreground">Connexion au flux en direct...</h2>
-        <p className="text-muted-foreground text-sm mt-2">Récupération des données du match</p>
+      <div className="bg-court-pattern flex min-h-screen flex-col items-center justify-center p-4">
+        <Loader2 className="text-primary mb-4 h-12 w-12 animate-spin" />
+        <h2 className="text-foreground text-xl font-medium">Connexion au flux en direct...</h2>
+        <p className="text-muted-foreground mt-2 text-sm">Récupération des données du match</p>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-background bg-court-pattern">
+    <div className="bg-background bg-court-pattern min-h-screen">
       {/* Navbar */}
-      <header className="sticky top-0 z-50 bg-background/80 backdrop-blur-md border-b border-border">
-        <div className="container mx-auto px-4 h-16 flex items-center justify-between">
-          <Link href="/" className="flex items-center text-muted-foreground hover:text-foreground transition-colors group">
-            <ArrowLeft className="w-4 h-4 mr-2 group-hover:-translate-x-1 transition-transform" />
+      <header className="bg-background/80 border-border sticky top-0 z-50 border-b backdrop-blur-md">
+        <div className="container mx-auto flex h-16 items-center justify-between px-4">
+          <Link
+            href="/"
+            className="text-muted-foreground hover:text-foreground group flex items-center transition-colors"
+          >
+            <ArrowLeft className="mr-2 h-4 w-4 transition-transform group-hover:-translate-x-1" />
             <span className="text-sm font-medium">Retour</span>
           </Link>
-          
+
           {/* Model selector in header */}
           {isHydrated && (
             <div className="hidden md:block">
@@ -71,21 +81,21 @@ export default function MatchPage() {
           )}
 
           <div className="flex items-center gap-2">
-            <div className="flex items-center gap-2 px-3 py-1 bg-muted/50 rounded-full border border-border">
+            <div className="bg-muted/50 border-border flex items-center gap-2 rounded-full border px-3 py-1">
               {connectionStatus === 'connected' ? (
                 <>
-                  <Wifi className="w-3.5 h-3.5 text-emerald-500" />
-                  <span className="text-xs font-medium text-muted-foreground">Connecté</span>
+                  <Wifi className="h-3.5 w-3.5 text-emerald-500" />
+                  <span className="text-muted-foreground text-xs font-medium">Connecté</span>
                 </>
               ) : connectionStatus === 'connecting' ? (
                 <>
-                  <Loader2 className="w-3.5 h-3.5 text-amber-500 animate-spin" />
-                  <span className="text-xs font-medium text-muted-foreground">Reconnexion...</span>
+                  <Loader2 className="h-3.5 w-3.5 animate-spin text-amber-500" />
+                  <span className="text-muted-foreground text-xs font-medium">Reconnexion...</span>
                 </>
               ) : (
                 <>
-                  <WifiOff className="w-3.5 h-3.5 text-destructive" />
-                  <span className="text-xs font-medium text-muted-foreground">Déconnecté</span>
+                  <WifiOff className="text-destructive h-3.5 w-3.5" />
+                  <span className="text-muted-foreground text-xs font-medium">Déconnecté</span>
                 </>
               )}
             </div>
@@ -94,23 +104,22 @@ export default function MatchPage() {
       </header>
 
       <main className="container mx-auto px-4 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-          
+        <div className="grid grid-cols-1 gap-8 lg:grid-cols-12">
           {/* Left Column: Match Data */}
-          <div className="lg:col-span-5 space-y-6">
+          <div className="space-y-6 lg:col-span-5">
             <section>
-              <h2 className="text-sm font-semibold uppercase tracking-widest text-muted-foreground mb-3 px-1">
+              <h2 className="text-muted-foreground mb-3 px-1 text-sm font-semibold tracking-widest uppercase">
                 Score en direct
               </h2>
               <LiveScoreBoard match={matchData} />
             </section>
-            
+
             <section>
               <StatsPanel match={matchData} />
             </section>
-            
+
             <div className="grid grid-cols-1 gap-6">
-              <PredictionHistory 
+              <PredictionHistory
                 performance={performance}
                 totalPredictions={totalPredictions}
                 verdictAccuracy={verdictAccuracy}
@@ -121,9 +130,9 @@ export default function MatchPage() {
 
           {/* Right Column: AI Predictions */}
           <div className="lg:col-span-7">
-            <section className="h-full min-h-[600px] bg-card/40 backdrop-blur-sm border border-border rounded-3xl p-6 lg:p-8 shadow-2xl relative overflow-hidden">
-              <div className="absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-full blur-[60px] pointer-events-none" />
-              <PredictionPanel 
+            <section className="bg-card/40 border-border relative h-full min-h-[600px] overflow-hidden rounded-3xl border p-6 shadow-2xl backdrop-blur-sm lg:p-8">
+              <div className="bg-primary/5 pointer-events-none absolute top-0 right-0 h-64 w-64 rounded-full blur-[60px]" />
+              <PredictionPanel
                 latestPrediction={latestPrediction}
                 isPredicting={isPredicting}
                 matchData={matchData}
@@ -131,7 +140,6 @@ export default function MatchPage() {
               />
             </section>
           </div>
-          
         </div>
       </main>
     </div>

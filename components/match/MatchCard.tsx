@@ -15,42 +15,51 @@ export function MatchCard({ match }: MatchCardProps) {
   const idStr = match.id.split(':').pop();
 
   return (
-    <Card className="overflow-hidden bg-card/50 backdrop-blur-sm hover:bg-card/80 transition-all duration-300 border-primary/20 hover:border-primary/50 group cursor-pointer shadow-md hover:shadow-primary/10">
+    <Card className="bg-card/50 hover:bg-card/80 border-primary/20 hover:border-primary/50 group hover:shadow-primary/10 cursor-pointer overflow-hidden shadow-md backdrop-blur-sm transition-all duration-300">
       <Link href={`/match/${idStr}`} className="block">
         <CardContent className="p-0">
-          <div className="flex flex-col md:flex-row items-center justify-between p-6 gap-6">
-            
+          <div className="flex flex-col items-center justify-between gap-6 p-6 md:flex-row">
             {/* Context Info */}
-            <div className="flex-1 space-y-3 w-full">
-              <div className="flex items-center gap-3 flex-wrap">
-                <Badge variant={match.status === 'live' ? 'destructive' : 'secondary'} className="animate-pulse-subtle">
+            <div className="w-full flex-1 space-y-3">
+              <div className="flex flex-wrap items-center gap-3">
+                <Badge
+                  variant={match.status === 'live' ? 'destructive' : 'secondary'}
+                  className="animate-pulse-subtle"
+                >
                   {match.status === 'live' ? '🔴 LIVE' : match.status.toUpperCase()}
                 </Badge>
-                <div className="flex items-center text-xs text-muted-foreground gap-1.5">
-                  <Trophy className="w-3.5 h-3.5" />
-                  <span className="truncate max-w-[150px] md:max-w-[200px]" title={match.tournament}>{match.tournament}</span>
+                <div className="text-muted-foreground flex items-center gap-1.5 text-xs">
+                  <Trophy className="h-3.5 w-3.5" />
+                  <span
+                    className="max-w-[150px] truncate md:max-w-[200px]"
+                    title={match.tournament}
+                  >
+                    {match.tournament}
+                  </span>
                 </div>
                 {match.venue && (
-                  <div className="flex items-center text-xs text-muted-foreground gap-1.5">
-                    <MapPin className="w-3.5 h-3.5" />
-                    <span className="truncate max-w-[150px]" title={match.venue}>{match.venue}</span>
+                  <div className="text-muted-foreground flex items-center gap-1.5 text-xs">
+                    <MapPin className="h-3.5 w-3.5" />
+                    <span className="max-w-[150px] truncate" title={match.venue}>
+                      {match.venue}
+                    </span>
                   </div>
                 )}
               </div>
 
               {/* Players & Score */}
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
                 <div className="space-y-1">
-                  <div className="text-lg font-semibold tracking-tight text-foreground/90 group-hover:text-foreground transition-colors">
+                  <div className="text-foreground/90 group-hover:text-foreground text-lg font-semibold tracking-tight transition-colors">
                     {formatPlayerName(match.home_player)}
                   </div>
-                  <div className="text-lg font-semibold tracking-tight text-foreground/90 group-hover:text-foreground transition-colors">
+                  <div className="text-foreground/90 group-hover:text-foreground text-lg font-semibold tracking-tight transition-colors">
                     {formatPlayerName(match.away_player)}
                   </div>
                 </div>
 
-                <div className="px-4 py-2 bg-background/50 rounded-lg border border-border flex items-center justify-center shrink-0">
-                  <span className="font-mono font-bold text-[var(--color-tennis-green)] tracking-widest text-lg">
+                <div className="bg-background/50 border-border flex shrink-0 items-center justify-center rounded-lg border px-4 py-2">
+                  <span className="font-mono text-lg font-bold tracking-widest text-[var(--color-tennis-green)]">
                     {match.score}
                   </span>
                 </div>
@@ -58,15 +67,14 @@ export function MatchCard({ match }: MatchCardProps) {
             </div>
 
             {/* Action */}
-            <div className="hidden md:flex shrink-0 items-center justify-center w-12 h-12 rounded-full bg-primary/10 text-primary group-hover:bg-primary group-hover:text-primary-foreground transition-all duration-300 transform group-hover:translate-x-1">
-              <ArrowRight className="w-5 h-5" />
+            <div className="bg-primary/10 text-primary group-hover:bg-primary group-hover:text-primary-foreground hidden h-12 w-12 shrink-0 transform items-center justify-center rounded-full transition-all duration-300 group-hover:translate-x-1 md:flex">
+              <ArrowRight className="h-5 w-5" />
             </div>
 
-            <div className="w-full md:hidden flex items-center justify-center gap-2 text-sm text-primary font-medium py-2 bg-primary/10 rounded-lg mt-2 group-hover:bg-primary group-hover:text-primary-foreground transition-colors">
+            <div className="text-primary bg-primary/10 group-hover:bg-primary group-hover:text-primary-foreground mt-2 flex w-full items-center justify-center gap-2 rounded-lg py-2 text-sm font-medium transition-colors md:hidden">
               <span>Suivre ce match</span>
-              <ArrowRight className="w-4 h-4" />
+              <ArrowRight className="h-4 w-4" />
             </div>
-            
           </div>
         </CardContent>
       </Link>

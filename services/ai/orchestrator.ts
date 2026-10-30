@@ -16,7 +16,7 @@ const ALL_MODELS: AIModel[] = ['claude', 'gpt4o', 'gemini'];
  */
 function withTimeout<T>(promise: Promise<T>, timeoutMs: number, model: string): Promise<T> {
   let timeoutHandle: NodeJS.Timeout;
-  
+
   const timeoutPromise = new Promise<never>((_, reject) => {
     timeoutHandle = setTimeout(() => {
       reject(new Error(`${model} timeout after ${timeoutMs}ms`));
@@ -29,7 +29,10 @@ function withTimeout<T>(promise: Promise<T>, timeoutMs: number, model: string): 
 }
 
 /** Model -> fetch function mapping */
-const MODEL_FETCHERS: Record<AIModel, (matchData: MatchData, prompt: string) => Promise<AIPrediction>> = {
+const MODEL_FETCHERS: Record<
+  AIModel,
+  (matchData: MatchData, prompt: string) => Promise<AIPrediction>
+> = {
   claude: getClaudePrediction,
   gpt4o: getGPTPrediction,
   gemini: getGeminiPrediction,
@@ -77,12 +80,12 @@ function createErrorPrediction(model: AIModel, errorMessage: string): AIPredicti
  */
 export async function runAllPredictions(
   matchData: MatchData,
-  selectedModels?: AIModel[]
+  selectedModels?: AIModel[],
 ): Promise<OrchestrationResult> {
   const modelsToCall = selectedModels && selectedModels.length > 0 ? selectedModels : ALL_MODELS;
   const prompt = buildPrompt(matchData);
   const { periodScores } = matchData.score;
-  
+
   // Current game number is total games played + 1
   const totalGames = periodScores.reduce((sum, set) => sum + set.home + set.away, 0);
   const gameNumber = totalGames + 1;
@@ -118,7 +121,9 @@ export async function runAllPredictions(
   }
 
   // Filter valid predictions for the verdict engine (exclude errors AND disabled)
-  const validPredictions = predictions.filter(p => !p.error && p.predicted_winner !== 'Unknown' && p.predicted_winner !== 'N/A');
+  const validPredictions = predictions.filter(
+    (p) => !p.error && p.predicted_winner !== 'Unknown' && p.predicted_winner !== 'N/A',
+  );
 
   if (validPredictions.length === 0) {
     throw new Error('All AI prediction calls failed');
@@ -134,4 +139,3 @@ export async function runAllPredictions(
     set_number: setNumber,
   };
 }
-

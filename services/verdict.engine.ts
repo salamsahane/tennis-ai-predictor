@@ -8,7 +8,7 @@ import type { VerdictResult, Weight } from '@/types/verdict.types';
 const BASE_WEIGHTS: Weight = {
   claude: 0.35,
   gpt4o: 0.35,
-  gemini: 0.30,
+  gemini: 0.3,
 };
 
 function getWeight(model: AIModel): number {
@@ -32,17 +32,20 @@ export function computeVerdict(predictions: AIPrediction[]): VerdictResult {
   }
 
   // 2. Determine the predicted winner
-  const predictedWinner = Object.entries(votes)
-    .sort(([, a], [, b]) => b - a)[0][0];
-  
+  const predictedWinner = Object.entries(votes).sort(([, a], [, b]) => b - a)[0][0];
+
   const winnerVoteShare = votes[predictedWinner];
 
   // 3. Calculate composite confidence score
-  const winningPredictions = predictions.filter(p => p.predicted_winner.trim() === predictedWinner);
-  
-  const avgProbability = winningPredictions.length > 0
-    ? winningPredictions.reduce((sum, p) => sum + p.win_probability, 0) / winningPredictions.length
-    : 0.5;
+  const winningPredictions = predictions.filter(
+    (p) => p.predicted_winner.trim() === predictedWinner,
+  );
+
+  const avgProbability =
+    winningPredictions.length > 0
+      ? winningPredictions.reduce((sum, p) => sum + p.win_probability, 0) /
+        winningPredictions.length
+      : 0.5;
 
   // Consensus factor: how many models agreed vs total valid models
   // 1.0 = unanimous, 0.66 = majority, 0.33 = single model (if 3 available)
@@ -60,13 +63,11 @@ export function computeVerdict(predictions: AIPrediction[]): VerdictResult {
   }
 
   // 4. Qualitative confidence level
-  const confidenceLevel =
-    confidenceScore >= 80 ? 'HIGH' :
-    confidenceScore >= 60 ? 'MEDIUM' : 'LOW';
+  const confidenceLevel = confidenceScore >= 80 ? 'HIGH' : confidenceScore >= 60 ? 'MEDIUM' : 'LOW';
 
   // 5. Agreement level
   let agreement: 'UNANIMOUS' | 'MAJORITY' | 'SPLIT' = 'SPLIT';
-  
+
   if (winningPredictions.length === predictions.length && predictions.length > 1) {
     agreement = 'UNANIMOUS';
   } else if (winningPredictions.length >= 2) {
@@ -76,16 +77,15 @@ export function computeVerdict(predictions: AIPrediction[]): VerdictResult {
   }
 
   // 6. Break prediction consensus (needs >= 50% agreement)
-  const breakVotes = predictions.filter(p => p.is_break_predicted).length;
-  const isBreakPredicted = breakVotes >= (predictions.length / 2);
+  const breakVotes = predictions.filter((p) => p.is_break_predicted).length;
+  const isBreakPredicted = breakVotes >= predictions.length / 2;
 
   // 7. Most common predicted score
   const scoreCounts: Record<string, number> = {};
   for (const p of predictions) {
     scoreCounts[p.predicted_score] = (scoreCounts[p.predicted_score] ?? 0) + 1;
   }
-  const mostCommonScore = Object.entries(scoreCounts)
-    .sort(([, a], [, b]) => b - a)[0][0];
+  const mostCommonScore = Object.entries(scoreCounts).sort(([, a], [, b]) => b - a)[0][0];
 
   return {
     predicted_winner: predictedWinner,
@@ -103,12 +103,12 @@ function buildSummary(
   winner: string,
   score: number,
   agreement: string,
-  modelCount: number
+  modelCount: number,
 ): string {
   if (modelCount < 3) {
     return `Analyse partielle (${modelCount}/3 modèles) : ${winner} favori.`;
   }
-  
+
   if (agreement === 'UNANIMOUS') {
     return `Consensus total pour ${winner} avec une forte certitude.`;
   } else if (score >= 70) {

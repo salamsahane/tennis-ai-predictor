@@ -99,16 +99,16 @@ export async function searchLiveMatches(query: string): Promise<MatchSearchResul
   const searchTerms = query.toLowerCase().split(/\s+/);
 
   return summaries
-    .filter(summary => {
+    .filter((summary) => {
       const competitors = summary.sport_event.competitors || [];
-      const names = competitors.map(c => c.name.toLowerCase()).join(' ');
-      return searchTerms.some(term => names.includes(term));
+      const names = competitors.map((c) => c.name.toLowerCase()).join(' ');
+      return searchTerms.some((term) => names.includes(term));
     })
-    .map(summary => {
+    .map((summary) => {
       const { sport_event, sport_event_status } = summary;
       const competitors = sport_event.competitors || [];
-      const home = competitors.find(c => c.qualifier === 'home');
-      const away = competitors.find(c => c.qualifier === 'away');
+      const home = competitors.find((c) => c.qualifier === 'home');
+      const away = competitors.find((c) => c.qualifier === 'away');
 
       const periodScores = sport_event_status.period_scores || [];
       const currentSet = periodScores.length || 1;
@@ -119,8 +119,12 @@ export async function searchLiveMatches(query: string): Promise<MatchSearchResul
 
       return {
         id: sport_event.id,
-        status: sport_event_status.status === 'live' ? 'live' as const :
-          sport_event_status.status === 'closed' ? 'final' as const : 'scheduled' as const,
+        status:
+          sport_event_status.status === 'live'
+            ? ('live' as const)
+            : sport_event_status.status === 'closed'
+              ? ('final' as const)
+              : ('scheduled' as const),
         tournament: sport_event.tournament?.name || 'Unknown Tournament',
         surface: sport_event.venue?.court_type || 'unknown',
         home_player: home?.name || 'Unknown',

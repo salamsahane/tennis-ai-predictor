@@ -19,10 +19,10 @@ export async function getMatchData(matchId: string): Promise<MatchData | null> {
 export function normalizeMatchData(summary: SportRadarSummary): MatchData {
   const { sport_event, sport_event_status, statistics } = summary;
   const competitors = sport_event.competitors || [];
-  const home = competitors.find(c => c.qualifier === 'home');
-  const away = competitors.find(c => c.qualifier === 'away');
+  const home = competitors.find((c) => c.qualifier === 'home');
+  const away = competitors.find((c) => c.qualifier === 'away');
 
-  const periodScores = (sport_event_status.period_scores || []).map(ps => ({
+  const periodScores = (sport_event_status.period_scores || []).map((ps) => ({
     home: ps.home_score,
     away: ps.away_score,
     type: 'set' as const,
@@ -49,8 +49,12 @@ export function normalizeMatchData(summary: SportRadarSummary): MatchData {
 
   return {
     id: sport_event.id,
-    status: sport_event_status.status === 'live' ? 'live' :
-            sport_event_status.status === 'closed' ? 'final' : 'scheduled',
+    status:
+      sport_event_status.status === 'live'
+        ? 'live'
+        : sport_event_status.status === 'closed'
+          ? 'final'
+          : 'scheduled',
     tournament: sport_event.tournament?.name || 'Unknown Tournament',
     surface: (sport_event.venue?.court_type as MatchData['surface']) || 'hard',
     players: {
@@ -97,7 +101,7 @@ export function normalizeMatchData(summary: SportRadarSummary): MatchData {
 
 function extractPlayerStats(
   statistics: SportRadarSummary['statistics'],
-  qualifier: 'home' | 'away'
+  qualifier: 'home' | 'away',
 ): PlayerStats {
   const defaultStats: PlayerStats = {
     aces: 0,
@@ -119,25 +123,26 @@ function extractPlayerStats(
 
   if (!statistics?.totals?.competitors) return defaultStats;
 
-  const comp = statistics.totals.competitors.find(c => c.qualifier === qualifier);
+  const comp = statistics.totals.competitors.find((c) => c.qualifier === qualifier);
   if (!comp?.statistics) return defaultStats;
 
   const s = comp.statistics;
 
   const firstServePercentage = s.first_serve_total
-    ? Math.round((s.first_serve_successful || 0) / s.first_serve_total * 100)
+    ? Math.round(((s.first_serve_successful || 0) / s.first_serve_total) * 100)
     : 0;
 
   const firstServePointsWon = s.first_serve_points_total
-    ? Math.round((s.first_serve_points_won || 0) / s.first_serve_points_total * 100)
+    ? Math.round(((s.first_serve_points_won || 0) / s.first_serve_points_total) * 100)
     : 0;
 
   const secondServePointsWon = s.second_serve_points_won || 0;
 
   const secondServeTotal = s.second_serve_points_total || 0;
-  const secondServePercentage = secondServeTotal > 0
-    ? Math.round((s.second_serve_points_won || 0) / secondServeTotal * 100)
-    : 0;
+  const secondServePercentage =
+    secondServeTotal > 0
+      ? Math.round(((s.second_serve_points_won || 0) / secondServeTotal) * 100)
+      : 0;
 
   const totalPointsWon = s.points_won || 0;
   const servicePointsWon = s.service_points_won || 0;
@@ -161,4 +166,3 @@ function extractPlayerStats(
     returnPointsWon: Math.max(0, returnPointsWon),
   };
 }
-

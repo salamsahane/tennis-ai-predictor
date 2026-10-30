@@ -11,7 +11,7 @@ const genAI = process.env.GEMINI_API_KEY
 
 export async function getGeminiPrediction(
   matchData: MatchData,
-  prompt: string
+  prompt: string,
 ): Promise<AIPrediction> {
   const startTime = Date.now();
 
