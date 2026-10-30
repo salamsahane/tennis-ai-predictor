@@ -1,0 +1,6 @@
+.next
+node_modules
+package-lock.json
+tennis-ai-predictor-spec.md
+docs
+.superpowers
