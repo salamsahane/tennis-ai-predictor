@@ -8,35 +8,64 @@ import type { AIModel } from '@/types/ai.types';
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
+const ALL_MODELS: AIModel[] = ['claude', 'gpt4o', 'gemini'];
+const RETRY_DELAY_MS = 10000;
+const HEARTBEAT_MS = 30000;
+
 function formatSSE(event: string, data: unknown): string {
   return `event: ${event}\ndata: ${JSON.stringify(data)}\n\n`;
+}
+
+/** Parse the `models` query param; undefined means "use the default selection". */
+function parseModelsParam(param: string | null): AIModel[] | undefined {
+  if (!param) return undefined;
+  return param.split(',').filter((m): m is AIModel => ALL_MODELS.includes(m as AIModel));
 }
 
 export async function GET(request: NextRequest, context: { params: Promise<{ matchId: string }> }) {
   // Await the params object per Next.js 15 routing conventions
   const { matchId } = await context.params;
-
-  // Parse selected models from query params
-  const modelsParam = request.nextUrl.searchParams.get('models');
-  const selectedModels: AIModel[] | undefined = modelsParam
-    ? modelsParam.split(',').filter((m): m is AIModel => ['claude', 'gpt4o', 'gemini'].includes(m))
-    : undefined;
+  const selectedModels = parseModelsParam(request.nextUrl.searchParams.get('models'));
 
   const encoder = new TextEncoder();
 
   const stream = new ReadableStream({
-    async start(controller) {
+    start(controller) {
       let isClosed = false;
-      let pollTimer: NodeJS.Timeout;
+      let pollTimer: NodeJS.Timeout | undefined;
 
-      // Ensure we clean up if the client disconnects
-      request.signal.addEventListener('abort', () => {
+      // No-op once the stream is closed (client gone or match over)
+      const send = (event: string, data: unknown) => {
+        if (isClosed) return;
+        controller.enqueue(encoder.encode(formatSSE(event, data)));
+      };
+
+      // Keep-alive heartbeat to prevent the connection from dropping
+      const heartbeatInterval = setInterval(
+        () => send('heartbeat', { timestamp: Date.now() }),
+        HEARTBEAT_MS,
+      );
+
+      // Idempotent: safe to call from abort, match end and error paths
+      const cleanup = () => {
+        if (isClosed) return;
         isClosed = true;
         clearTimeout(pollTimer);
-        controller.close();
-      });
+        clearInterval(heartbeatInterval);
+        try {
+          controller.close();
+        } catch {
+          // Already closed by the runtime
+        }
+      };
 
-      const poll = async () => {
+      const schedulePoll = (delayMs: number) => {
+        if (!isClosed) pollTimer = setTimeout(poll, delayMs);
+      };
+
+      request.signal.addEventListener('abort', cleanup);
+
+      async function poll() {
         if (isClosed) return;
 
         try {
@@ -44,69 +73,52 @@ export async function GET(request: NextRequest, context: { params: Promise<{ mat
           const matchData = await getMatchData(matchId);
 
           if (!matchData) {
-            controller.enqueue(encoder.encode(formatSSE('error', { message: 'Match not found' })));
-            // Try again in 10s just in case it was a temporary API failure
-            if (!isClosed) pollTimer = setTimeout(poll, 10000);
+            send('error', { message: 'Match not found' });
+            // Try again later in case it was a temporary API failure
+            schedulePoll(RETRY_DELAY_MS);
             return;
           }
 
           // 2. Send match update
-          controller.enqueue(encoder.encode(formatSSE('match_update', matchData)));
+          send('match_update', matchData);
 
           if (matchData.status === 'final') {
-            controller.enqueue(
-              encoder.encode(formatSSE('match_ended', { final_score: matchData.score })),
-            );
-            isClosed = true;
-            controller.close();
+            send('match_ended', { final_score: matchData.score });
+            cleanup();
             return;
           }
 
-          // 3. Detect game end
+          // 3. Detect game end. Predictions are awaited, so the next poll
+          // is scheduled only after they finish.
           const gameEnded = await detectGameEnd(matchData, matchId);
 
           if (gameEnded) {
-            controller.enqueue(encoder.encode(formatSSE('prediction_start', {})));
-
+            send('prediction_start', {});
             try {
-              // Run predictions without blocking the next poll
               const result = await runAllPredictions(matchData, selectedModels);
-              if (!isClosed) {
-                controller.enqueue(encoder.encode(formatSSE('prediction_result', result)));
-              }
+              send('prediction_result', result);
             } catch (err) {
               console.error('[Stream] Prediction failed:', err);
-              if (!isClosed) {
-                controller.enqueue(
-                  encoder.encode(formatSSE('error', { message: 'AI Prediction failed' })),
-                );
-              }
+              send('error', { message: 'AI Prediction failed' });
             }
           }
 
           // 4. Schedule next poll dynamically
-          const interval = getPollingInterval(matchData);
-          if (!isClosed) pollTimer = setTimeout(poll, interval);
+          schedulePoll(getPollingInterval(matchData));
         } catch (error) {
           console.error('[Stream] Poll failed:', error);
-          if (!isClosed) {
-            controller.enqueue(encoder.encode(formatSSE('error', { message: 'Poll failed' })));
-            pollTimer = setTimeout(poll, 10000); // Backoff
-          }
+          send('error', { message: 'Poll failed' });
+          schedulePoll(RETRY_DELAY_MS); // Backoff
         }
-      };
+      }
 
-      // Start polling
-      poll();
+      // The request may already be aborted before the stream starts
+      if (request.signal.aborted) {
+        cleanup();
+        return;
+      }
 
-      // Keep-alive heartbeat every 30s to prevent connection dropping
-      const heartbeatInterval = setInterval(() => {
-        if (!isClosed) {
-          controller.enqueue(encoder.encode(formatSSE('heartbeat', { timestamp: Date.now() })));
-        } else {
-          clearInterval(heartbeatInterval);
-        }
-      }, 30000);
+      void poll();
     },
   });
 
