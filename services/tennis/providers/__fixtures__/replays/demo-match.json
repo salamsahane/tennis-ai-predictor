@@ -1,0 +1,283 @@
+{
+  "id": "demo-match",
+  "label": "Sinner, Jannik vs Alcaraz, Carlos",
+  "players": {
+    "home": "Sinner, Jannik",
+    "away": "Alcaraz, Carlos"
+  },
+  "tournament": "Paris Masters",
+  "surface": "hard",
+  "startedAt": 0,
+  "snapshots": [
+    {
+      "t": 0,
+      "data": {
+        "id": "sr:sport_event:demo",
+        "status": "live",
+        "tournament": "Paris Masters",
+        "surface": "hard",
+        "source": {
+          "providerId": "sportradar",
+          "label": "Sportradar",
+          "kind": "live"
+        },
+        "players": {
+          "home": {
+            "id": "p1",
+            "name": "Sinner, Jannik",
+            "country": "ITA"
+          },
+          "away": {
+            "id": "p2",
+            "name": "Alcaraz, Carlos",
+            "country": "ESP"
+          }
+        },
+        "score": {
+          "sets": {
+            "home": 0,
+            "away": 0
+          },
+          "currentSet": {
+            "home": 1,
+            "away": 0
+          },
+          "currentGame": {
+            "home": "0",
+            "away": "0",
+            "tieBreak": false
+          },
+          "periodScores": [
+            {
+              "home": 1,
+              "away": 0,
+              "type": "set",
+              "number": 1
+            }
+          ],
+          "serving": "home"
+        },
+        "statistics": {
+          "home": {
+            "aces": null,
+            "doubleFaults": null,
+            "firstServePercentage": null,
+            "firstServePointsWon": null,
+            "secondServePointsWon": null,
+            "secondServePercentage": null,
+            "winners": null,
+            "unforcedErrors": null,
+            "breakPointsWon": null,
+            "breakPointsTotal": null,
+            "pointsWonLast10": null,
+            "serviceGamesWon": null,
+            "gamesWon": null,
+            "totalPointsWon": null,
+            "returnPointsWon": null
+          },
+          "away": {
+            "aces": null,
+            "doubleFaults": null,
+            "firstServePercentage": null,
+            "firstServePointsWon": null,
+            "secondServePointsWon": null,
+            "secondServePercentage": null,
+            "winners": null,
+            "unforcedErrors": null,
+            "breakPointsWon": null,
+            "breakPointsTotal": null,
+            "pointsWonLast10": null,
+            "serviceGamesWon": null,
+            "gamesWon": null,
+            "totalPointsWon": null,
+            "returnPointsWon": null
+          }
+        },
+        "nextGame": {
+          "number": 2,
+          "server": "home"
+        }
+      }
+    },
+    {
+      "t": 10000,
+      "data": {
+        "id": "sr:sport_event:demo",
+        "status": "live",
+        "tournament": "Paris Masters",
+        "surface": "hard",
+        "source": {
+          "providerId": "sportradar",
+          "label": "Sportradar",
+          "kind": "live"
+        },
+        "players": {
+          "home": {
+            "id": "p1",
+            "name": "Sinner, Jannik",
+            "country": "ITA"
+          },
+          "away": {
+            "id": "p2",
+            "name": "Alcaraz, Carlos",
+            "country": "ESP"
+          }
+        },
+        "score": {
+          "sets": {
+            "home": 0,
+            "away": 0
+          },
+          "currentSet": {
+            "home": 3,
+            "away": 2
+          },
+          "currentGame": {
+            "home": "15",
+            "away": "30",
+            "tieBreak": false
+          },
+          "periodScores": [
+            {
+              "home": 3,
+              "away": 2,
+              "type": "set",
+              "number": 1
+            }
+          ],
+          "serving": "home"
+        },
+        "statistics": {
+          "home": {
+            "aces": null,
+            "doubleFaults": null,
+            "firstServePercentage": null,
+            "firstServePointsWon": null,
+            "secondServePointsWon": null,
+            "secondServePercentage": null,
+            "winners": null,
+            "unforcedErrors": null,
+            "breakPointsWon": null,
+            "breakPointsTotal": null,
+            "pointsWonLast10": null,
+            "serviceGamesWon": null,
+            "gamesWon": null,
+            "totalPointsWon": null,
+            "returnPointsWon": null
+          },
+          "away": {
+            "aces": null,
+            "doubleFaults": null,
+            "firstServePercentage": null,
+            "firstServePointsWon": null,
+            "secondServePointsWon": null,
+            "secondServePercentage": null,
+            "winners": null,
+            "unforcedErrors": null,
+            "breakPointsWon": null,
+            "breakPointsTotal": null,
+            "pointsWonLast10": null,
+            "serviceGamesWon": null,
+            "gamesWon": null,
+            "totalPointsWon": null,
+            "returnPointsWon": null
+          }
+        },
+        "nextGame": {
+          "number": 6,
+          "server": "home"
+        }
+      }
+    },
+    {
+      "t": 20000,
+      "data": {
+        "id": "sr:sport_event:demo",
+        "status": "final",
+        "tournament": "Paris Masters",
+        "surface": "hard",
+        "source": {
+          "providerId": "sportradar",
+          "label": "Sportradar",
+          "kind": "live"
+        },
+        "players": {
+          "home": {
+            "id": "p1",
+            "name": "Sinner, Jannik",
+            "country": "ITA"
+          },
+          "away": {
+            "id": "p2",
+            "name": "Alcaraz, Carlos",
+            "country": "ESP"
+          }
+        },
+        "score": {
+          "sets": {
+            "home": 0,
+            "away": 0
+          },
+          "currentSet": {
+            "home": 6,
+            "away": 4
+          },
+          "currentGame": {
+            "home": "40",
+            "away": "0",
+            "tieBreak": false
+          },
+          "periodScores": [
+            {
+              "home": 6,
+              "away": 4,
+              "type": "set",
+              "number": 1
+            }
+          ],
+          "serving": "home"
+        },
+        "statistics": {
+          "home": {
+            "aces": null,
+            "doubleFaults": null,
+            "firstServePercentage": null,
+            "firstServePointsWon": null,
+            "secondServePointsWon": null,
+            "secondServePercentage": null,
+            "winners": null,
+            "unforcedErrors": null,
+            "breakPointsWon": null,
+            "breakPointsTotal": null,
+            "pointsWonLast10": null,
+            "serviceGamesWon": null,
+            "gamesWon": null,
+            "totalPointsWon": null,
+            "returnPointsWon": null
+          },
+          "away": {
+            "aces": null,
+            "doubleFaults": null,
+            "firstServePercentage": null,
+            "firstServePointsWon": null,
+            "secondServePointsWon": null,
+            "secondServePercentage": null,
+            "winners": null,
+            "unforcedErrors": null,
+            "breakPointsWon": null,
+            "breakPointsTotal": null,
+            "pointsWonLast10": null,
+            "serviceGamesWon": null,
+            "gamesWon": null,
+            "totalPointsWon": null,
+            "returnPointsWon": null
+          }
+        },
+        "nextGame": {
+          "number": 11,
+          "server": "home"
+        }
+      }
+    }
+  ]
+}
