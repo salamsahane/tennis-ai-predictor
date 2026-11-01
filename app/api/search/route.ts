@@ -1,7 +1,8 @@
 import { type NextRequest } from 'next/server';
 import type { Redis } from '@upstash/redis';
 import { z } from 'zod';
-import { sportradarProvider } from '@/services/tennis/providers/sportradar.provider';
+import { registry } from '@/services/tennis/providers/registry';
+import { filterMatches } from '@/lib/match-search';
 import { redis, isRealRedis } from '@/lib/redis';
 import { Ratelimit } from '@upstash/ratelimit';
 
@@ -46,16 +47,13 @@ export async function GET(request: NextRequest) {
 
     // 3. Search matches
     const query = validationResult.data.q;
-    // Temporary inline filter until the registry-based search lands.
-    const terms = query.toLowerCase().split(/\s+/);
-    const matches = (await sportradarProvider.listLiveMatches()).filter((m) => {
-      const names = `${m.home_player} ${m.away_player}`.toLowerCase();
-      return terms.some((term) => names.includes(term));
-    });
+    const result = await registry.listLiveMatches();
+    const matches = filterMatches(result.matches, query);
 
     return Response.json({
       matches,
       total: matches.length,
+      unavailableSources: result.unavailableSources,
     });
   } catch (error) {
     console.error('[API] Search failed:', error);

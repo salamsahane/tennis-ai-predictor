@@ -1,5 +1,6 @@
 import { type NextRequest } from 'next/server';
-import { getMatchData } from '@/services/tennis/match.service';
+import { registry } from '@/services/tennis/providers/registry';
+import { ProviderError, logProviderError } from '@/services/tennis/providers/errors';
 import { detectGameEnd, getPollingInterval } from '@/services/tennis/game-state.service';
 import { runAllPredictions } from '@/services/ai/orchestrator';
 import type { AIModel } from '@/types/ai.types';
@@ -79,7 +80,7 @@ export async function GET(request: NextRequest, context: { params: Promise<{ mat
 
         try {
           // 1. Fetch current data
-          const matchData = await getMatchData(matchId);
+          const matchData = await registry.getMatchById(decodeURIComponent(matchId));
 
           if (!matchData) {
             send('error', { message: 'Match not found' });
@@ -115,7 +116,16 @@ export async function GET(request: NextRequest, context: { params: Promise<{ mat
           // 4. Schedule next poll dynamically
           schedulePoll(getPollingInterval(matchData));
         } catch (error) {
-          console.error('[Stream] Poll failed:', error);
+          if (error instanceof ProviderError) {
+            logProviderError(error);
+            if (error.kind === 'auth' || error.kind === 'rate_limit') {
+              send('source_unavailable', { providerId: error.providerId });
+              cleanup();
+              return;
+            }
+          } else {
+            console.error('[Stream] Poll failed unexpectedly');
+          }
           send('error', { message: 'Poll failed' });
           schedulePoll(RETRY_DELAY_MS); // Backoff
         }

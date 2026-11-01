@@ -1,17 +1,7 @@
 // services/tennis/match.service.ts
 // Match data normalization and fetching
 
-import { getMatchSummary } from './sportradar.client';
 import type { MatchData, PlayerStats, SportRadarSummary } from '@/types/tennis.types';
-
-/**
- * Fetch and normalize match data by event ID
- */
-export async function getMatchData(matchId: string): Promise<MatchData | null> {
-  const summary = await getMatchSummary(matchId);
-  if (!summary) return null;
-  return normalizeMatchData(summary);
-}
 
 /**
  * Normalize a SportRadar API response into our MatchData format

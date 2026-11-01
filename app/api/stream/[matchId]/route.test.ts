@@ -2,17 +2,18 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { NextRequest } from 'next/server';
 import type { MatchData } from '@/types/tennis.types';
 
-vi.mock('@/services/tennis/match.service', () => ({ getMatchData: vi.fn() }));
+vi.mock('@/services/tennis/providers/registry', () => ({ registry: { getMatchById: vi.fn() } }));
 vi.mock('@/services/tennis/game-state.service', () => ({
   detectGameEnd: vi.fn(async () => false),
   getPollingInterval: vi.fn(() => 1000),
 }));
 vi.mock('@/services/ai/orchestrator', () => ({ runAllPredictions: vi.fn() }));
 
-import { getMatchData } from '@/services/tennis/match.service';
+import { registry } from '@/services/tennis/providers/registry';
+import { ProviderError } from '@/services/tennis/providers/errors';
 import { GET } from './route';
 
-const mockedGetMatchData = vi.mocked(getMatchData);
+const mockedGetMatchData = vi.mocked(registry.getMatchById);
 
 function open() {
   const abort = new AbortController();
@@ -88,5 +89,36 @@ describe('GET /api/stream/[matchId]', () => {
 
     abort.abort();
     expect(vi.getTimerCount()).toBe(0);
+  });
+
+  it('auth error sends source_unavailable and closes', async () => {
+    mockedGetMatchData.mockRejectedValue(new ProviderError('apitennis', 'auth', 'bad key', 401));
+    const { res } = open();
+    const text = await readAll((await res).body!);
+
+    expect(text).toContain('event: source_unavailable');
+    expect(text).toContain('"providerId":"apitennis"');
+    expect(vi.getTimerCount()).toBe(0);
+  });
+
+  it('transient error keeps retrying', async () => {
+    mockedGetMatchData.mockRejectedValue(new ProviderError('apitennis', 'transient', 'boom'));
+    const { abort, res } = open();
+    const reader = (await res).body!.getReader();
+    await flush();
+
+    const { value } = await reader.read();
+    expect(new TextDecoder().decode(value)).toContain('Poll failed');
+    expect(vi.getTimerCount()).toBeGreaterThan(0);
+    abort.abort();
+  });
+
+  it('decodes the match id before lookup', async () => {
+    mockedGetMatchData.mockResolvedValue({ status: 'final', score: {} } as MatchData);
+    const abort = new AbortController();
+    const req = new NextRequest('http://localhost/api/stream/x', { signal: abort.signal });
+    const res = await GET(req, { params: Promise.resolve({ matchId: 'apitennis%3A123' }) });
+    await readAll(res.body!);
+    expect(mockedGetMatchData).toHaveBeenCalledWith('apitennis:123');
   });
 });
