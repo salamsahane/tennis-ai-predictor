@@ -21,12 +21,14 @@ export function MatchCard({ match }: MatchCardProps) {
             {/* Context Info */}
             <div className="w-full flex-1 space-y-3">
               <div className="flex flex-wrap items-center gap-3">
-                <Badge
-                  variant={match.status === 'live' ? 'destructive' : 'secondary'}
-                  className="animate-pulse-subtle"
-                >
-                  {match.status === 'live' ? '🔴 LIVE' : match.status.toUpperCase()}
-                </Badge>
+                {!(match.source.kind === 'replay' && match.status === 'live') && (
+                  <Badge
+                    variant={match.status === 'live' ? 'destructive' : 'secondary'}
+                    className="animate-pulse-subtle"
+                  >
+                    {match.status === 'live' ? '🔴 LIVE' : match.status.toUpperCase()}
+                  </Badge>
+                )}
                 <SourceBadge source={match.source} />
                 <div className="text-muted-foreground flex items-center gap-1.5 text-xs">
                   <Trophy className="h-3.5 w-3.5" />

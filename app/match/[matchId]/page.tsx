@@ -107,7 +107,7 @@ export default function MatchPage() {
             <section>
               <div className="mb-3 flex items-center justify-between gap-2 px-1">
                 <h2 className="text-muted-foreground text-sm font-semibold tracking-widest uppercase">
-                  Score en direct
+                  {matchData.source.kind === 'replay' ? 'Score du replay' : 'Score en direct'}
                 </h2>
                 <SourceBadge source={matchData.source} />
               </div>
