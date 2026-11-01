@@ -3,6 +3,7 @@ import { logProviderError, ProviderError, toProviderError } from './errors';
 import { isHealthy, reportFailure, reportSuccess } from './health';
 import { recordSnapshot } from './recorder';
 import { createReplayProvider } from './replay.provider';
+import { apitennisProvider } from './apitennis.provider';
 import { sportradarProvider } from './sportradar.provider';
 import type { TennisDataProvider } from './types';
 
@@ -113,6 +114,7 @@ export function createRegistry(providers: TennisDataProvider[]): Registry {
 
 const factories: Record<string, () => TennisDataProvider> = {
   sportradar: () => sportradarProvider,
+  apitennis: () => apitennisProvider,
   replay: () => createReplayProvider(),
 };
 
