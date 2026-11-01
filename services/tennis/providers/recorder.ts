@@ -10,7 +10,12 @@ export async function recordSnapshot(
 ): Promise<void> {
   if (process.env.RECORD_MATCHES !== '1') return;
   try {
-    const dir = path.resolve(process.cwd(), opts.dir ?? process.env.REPLAY_DIR ?? 'data/replays');
+    // Resolved at runtime (not traced); next.config.ts ships data/replays
+    // via outputFileTracingIncludes
+    const dir = path.resolve(
+      /*turbopackIgnore: true*/ process.cwd(),
+      opts.dir ?? process.env.REPLAY_DIR ?? 'data/replays',
+    );
     const now = opts.now ?? Date.now();
     const id = matchId.replace(/:/g, '-');
     const file = path.join(dir, `${id}.json`);

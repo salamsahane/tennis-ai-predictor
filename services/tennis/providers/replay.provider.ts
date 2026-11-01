@@ -37,7 +37,12 @@ function loadRecordings(dir: string): Recording[] {
 export function createReplayProvider(
   opts: { dir?: string; speed?: number; epoch?: number } = {},
 ): TennisDataProvider {
-  const dir = path.resolve(process.cwd(), opts.dir ?? process.env.REPLAY_DIR ?? 'data/replays');
+  // Resolved at runtime (not traced); next.config.ts ships data/replays
+  // via outputFileTracingIncludes
+  const dir = path.resolve(
+    /*turbopackIgnore: true*/ process.cwd(),
+    opts.dir ?? process.env.REPLAY_DIR ?? 'data/replays',
+  );
   const speed = opts.speed ?? (Number(process.env.REPLAY_SPEED) || 1);
   const epoch = opts.epoch ?? (Number(process.env.REPLAY_EPOCH) || 0);
   let cache: Recording[] | null = null;
