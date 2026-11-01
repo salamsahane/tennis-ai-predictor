@@ -153,12 +153,31 @@ describe('apitennisProvider', () => {
     expect(m?.statistics.home.returnPointsWon).toBe(0);
   });
 
-  it('success 0 body -> auth ProviderError', async () => {
-    route({ data: { error: '1', result: [{ msg: 'Wrong login credentials', cod: 1004 }] } });
+  it('credential error body (cod 1004) -> auth ProviderError', async () => {
+    route({ data: { error: '1', result: [{ cod: 1004, msg: 'Wrong login credentials' }] } });
     await expect(apitennisProvider.getMatch('1')).rejects.toMatchObject({
       providerId: 'apitennis',
       kind: 'auth',
     });
+    await expect(apitennisProvider.listLiveMatches()).rejects.toMatchObject({ kind: 'auth' });
+  });
+
+  it('other error body -> transient, not auth', async () => {
+    route({ data: { error: '1', result: [{ cod: 1001, msg: 'Something else' }] } });
+    await expect(apitennisProvider.listLiveMatches()).rejects.toMatchObject({
+      providerId: 'apitennis',
+      kind: 'transient',
+    });
+  });
+
+  it('malformed body -> transient', async () => {
+    route({ data: 'not json' });
+    await expect(apitennisProvider.listLiveMatches()).rejects.toMatchObject({ kind: 'transient' });
+  });
+
+  it('getMatch: non-credential error body -> not_found', async () => {
+    route({ data: { error: '1', result: [{ cod: 1001, msg: 'No event' }] } });
+    await expect(apitennisProvider.getMatch('1')).rejects.toMatchObject({ kind: 'not_found' });
   });
 
   it('HTTP 429 -> rate_limit', async () => {
@@ -201,6 +220,14 @@ describe('apitennisProvider', () => {
     route({ data: fixture }, drawBody('Clay'));
     expect((await apitennisProvider.getMatch('1'))?.surface).toBe('clay');
     expect(store.get('apitennis:surface:1706')).toBe('clay');
+  });
+
+  it('unknown surface is cached as a sentinel and returned as null', async () => {
+    route({ data: fixture }, drawBody('Carpet'));
+    expect((await apitennisProvider.getMatch('1'))?.surface).toBeNull();
+    expect((await apitennisProvider.getMatch('1'))?.surface).toBeNull();
+    const draws = get.mock.calls.filter((c) => c[1].params.method === 'get_draw');
+    expect(draws).toHaveLength(1);
   });
 
   it('lists live matches with namespaced ids', async () => {

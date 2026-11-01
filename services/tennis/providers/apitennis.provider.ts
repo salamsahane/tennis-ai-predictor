@@ -5,12 +5,14 @@ import axios from 'axios';
 import type { MatchData, MatchSearchResult, PeriodScore, PlayerStats } from '@/types/tennis.types';
 import { redis } from '@/lib/redis';
 import { deriveStats, gameWinners, type GameRecord } from './derive-stats';
-import { logProviderError, ProviderError, toProviderError } from './errors';
+import { logProviderError, ProviderError, toProviderError, type ProviderErrorKind } from './errors';
 import type { SourceInfo, TennisDataProvider } from './types';
 
 const ID = 'apitennis';
 const BASE_URL = 'https://api.api-tennis.com/tennis/';
 const SURFACE_TTL = 86_400; // seconds
+const UNKNOWN_SURFACE = 'unknown'; // cached so get_draw is not repeated every poll
+const BAD_CREDENTIALS_CODE = 1004;
 const SOURCE: SourceInfo = { providerId: ID, label: 'api-tennis', kind: 'live' };
 
 type Side = 'home' | 'away';
@@ -255,11 +257,32 @@ function normalizeSurface(raw: string | null | undefined): MatchData['surface'] 
 
 // --- HTTP ---------------------------------------------------------------
 
-async function request(params: Record<string, string>): Promise<unknown> {
+interface ApiBody {
+  success?: number | string;
+  error?: number | string;
+  result?: unknown;
+}
+
+function isCredentialError(body: ApiBody): boolean {
+  if (!Array.isArray(body.result)) return false;
+  return body.result.some(
+    (r) =>
+      typeof r === 'object' &&
+      r !== null &&
+      Number((r as { cod?: unknown }).cod) === BAD_CREDENTIALS_CODE,
+  );
+}
+
+// `errorBodyKind` is the kind for an error body that is not a credential
+// error: transient by default (self-heals), not_found for a single-event lookup.
+async function request(
+  params: Record<string, string>,
+  errorBodyKind: ProviderErrorKind = 'transient',
+): Promise<unknown> {
   const key = process.env.APITENNIS_API_KEY;
   if (!key) throw new ProviderError(ID, 'auth', 'APITENNIS_API_KEY is not configured');
 
-  let body: { success?: number | string; result?: unknown } | undefined;
+  let body: ApiBody | undefined;
   try {
     // The key travels in `params`; errors are mapped, never logged raw, because
     // axios errors embed the request URL.
@@ -274,9 +297,17 @@ async function request(params: Record<string, string>): Promise<unknown> {
     throw e;
   }
 
-  // Bad credentials come back as HTTP 200 with {"error":"1","result":[{"cod":1004,...}]}.
-  if (!body || (body.success !== 1 && body.success !== '1')) {
-    const e = new ProviderError(ID, 'auth', 'Provider rejected the request (success != 1)');
+  if (typeof body !== 'object' || body === null) {
+    const e = new ProviderError(ID, 'transient', 'Malformed provider response');
+    logProviderError(e);
+    throw e;
+  }
+  if (body.success !== 1 && body.success !== '1') {
+    // Bad credentials come back as HTTP 200 with {"error":"1","result":[{"cod":1004,...}]}.
+    // Any other error body (quota, unknown event, ...) must not trigger the 1 h auth pause.
+    const e = isCredentialError(body)
+      ? new ProviderError(ID, 'auth', 'Provider rejected credentials (cod 1004)')
+      : new ProviderError(ID, errorBodyKind, 'Provider returned an error body');
     logProviderError(e);
     throw e;
   }
@@ -290,14 +321,15 @@ async function fetchSurface(
   const cacheKey = `${ID}:surface:${tournamentKey}`;
   try {
     const cached = await redis.get(cacheKey);
-    if (typeof cached === 'string') return normalizeSurface(cached);
+    if (typeof cached === 'string')
+      return cached === UNKNOWN_SURFACE ? null : normalizeSurface(cached);
 
     const result = (await request({
       method: 'get_draw',
       tournament_key: String(tournamentKey),
     })) as { tournament?: { tournament_surface?: string } } | undefined;
     const surface = normalizeSurface(result?.tournament?.tournament_surface);
-    if (surface) await redis.set(cacheKey, surface, { ex: SURFACE_TTL });
+    await redis.set(cacheKey, surface ?? UNKNOWN_SURFACE, { ex: SURFACE_TTL });
     return surface;
   } catch {
     return null; // surface is optional; never fail the match over it
@@ -389,7 +421,10 @@ export const apitennisProvider: TennisDataProvider = {
   },
 
   async getMatch(nativeId: string): Promise<MatchData | null> {
-    const events = asEvents(await request({ method: 'get_livescore', match_key: nativeId }));
+    // An error body here usually means "no such event": report not_found (no health change)
+    const events = asEvents(
+      await request({ method: 'get_livescore', match_key: nativeId }, 'not_found'),
+    );
     const event = events[0];
     if (!event) throw new ProviderError(ID, 'not_found', 'Match not found');
     return toMatchData(event, await fetchSurface(event.tournament_key));
