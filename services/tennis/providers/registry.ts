@@ -118,8 +118,9 @@ const factories: Record<string, () => TennisDataProvider> = {
   replay: () => createReplayProvider(),
 };
 
-function buildDefaultProviders(): TennisDataProvider[] {
-  const ids = (process.env.TENNIS_PROVIDERS ?? 'sportradar,apitennis,replay')
+export function buildDefaultProviders(): TennisDataProvider[] {
+  // `||` so an empty TENNIS_PROVIDERS still gets the default order
+  const ids = (process.env.TENNIS_PROVIDERS || 'sportradar,apitennis,replay')
     .split(',')
     .map((s) => s.trim())
     .filter(Boolean);

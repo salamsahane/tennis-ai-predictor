@@ -44,7 +44,9 @@ export function useMatchStream(matchId: string | null) {
         eventSource.close();
       }
 
-      eventSource = new EventSource(`/api/stream/${matchId}?models=${modelsParam}`);
+      eventSource = new EventSource(
+        `/api/stream/${encodeURIComponent(matchId)}?models=${modelsParam}`,
+      );
 
       eventSource.addEventListener('match_update', (e) => {
         if (!isMounted) return;

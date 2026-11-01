@@ -55,8 +55,10 @@ export const sportradarProvider: TennisDataProvider = {
   },
 
   async getMatch(nativeId: string): Promise<MatchData | null> {
-    const summary = await getMatchSummary(`sr:sport_event:${nativeId}`);
+    // Accept both "123" and "sr:sport_event:123"
+    const id = numericId(nativeId);
+    const summary = await getMatchSummary(`sr:sport_event:${id}`);
     if (!summary) return null;
-    return { ...normalizeMatchData(summary), id: `${ID}:${nativeId}` };
+    return { ...normalizeMatchData(summary), id: `${ID}:${id}` };
   },
 };

@@ -43,6 +43,15 @@ describe('sportradarProvider', () => {
     expect(get.mock.calls[0][0]).toContain('sr:sport_event:123');
   });
 
+  it('getMatch does not double an existing sr:sport_event prefix', async () => {
+    get.mockResolvedValue({ data: fixture });
+    const m = await sportradarProvider.getMatch('sr:sport_event:123');
+    const url = get.mock.calls[0][0] as string;
+    expect(url).toContain('sr:sport_event:123');
+    expect(url).not.toContain('sr:sport_event:sr:sport_event');
+    expect(m?.id).toBe('sportradar:123');
+  });
+
   it('403 throws auth ProviderError', async () => {
     get.mockRejectedValue({ isAxiosError: true, response: { status: 403 } });
     const err = await sportradarProvider.getMatch('123').catch((e) => e);

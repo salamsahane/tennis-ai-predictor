@@ -5,7 +5,8 @@ import { redis } from '@/lib/redis';
 import type { MatchData } from '@/types/tennis.types';
 
 /**
- * Detect if a game just ended by comparing total games count with previous state
+ * Detect if a game just ended: only an increase in total games counts. A drop
+ * (e.g. a replay wrapping to its start) just resets the stored count.
  */
 export async function detectGameEnd(currentData: MatchData, matchId: string): Promise<boolean> {
   const previousKey = `match:${matchId}:lastGamesCount`;
@@ -13,13 +14,9 @@ export async function detectGameEnd(currentData: MatchData, matchId: string): Pr
 
   const currentGamesCount = getTotalGamesPlayed(currentData);
 
-  if (previousCount !== null && Number(previousCount) !== currentGamesCount) {
-    await redis.set(previousKey, currentGamesCount, { ex: 3600 });
-    return true; // A game just ended
-  }
-
+  const gameEnded = previousCount !== null && currentGamesCount > Number(previousCount);
   await redis.set(previousKey, currentGamesCount, { ex: 3600 });
-  return false;
+  return gameEnded;
 }
 
 /**

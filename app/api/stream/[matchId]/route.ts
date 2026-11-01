@@ -25,7 +25,14 @@ function parseModelsParam(param: string | null): AIModel[] | undefined {
 
 export async function GET(request: NextRequest, context: { params: Promise<{ matchId: string }> }) {
   // Await the params object per Next.js 15 routing conventions
-  const { matchId } = await context.params;
+  const { matchId: rawMatchId } = await context.params;
+  // Decode once; a malformed escape (e.g. "%E0") can never match
+  let matchId: string | null;
+  try {
+    matchId = decodeURIComponent(rawMatchId);
+  } catch {
+    matchId = null;
+  }
   const selectedModels = parseModelsParam(request.nextUrl.searchParams.get('models'));
 
   const encoder = new TextEncoder();
@@ -70,17 +77,17 @@ export async function GET(request: NextRequest, context: { params: Promise<{ mat
       stopStream = cleanup;
 
       const schedulePoll = (delayMs: number) => {
-        if (!isClosed) pollTimer = setTimeout(poll, delayMs);
+        if (!isClosed && matchId !== null) pollTimer = setTimeout(poll, delayMs, matchId);
       };
 
       request.signal.addEventListener('abort', cleanup);
 
-      async function poll() {
+      async function poll(id: string) {
         if (isClosed) return;
 
         try {
           // 1. Fetch current data
-          const matchData = await registry.getMatchById(decodeURIComponent(matchId));
+          const matchData = await registry.getMatchById(id);
 
           if (!matchData) {
             send('error', { message: 'Match not found' });
@@ -100,7 +107,7 @@ export async function GET(request: NextRequest, context: { params: Promise<{ mat
 
           // 3. Detect game end. Predictions are awaited, so the next poll
           // is scheduled only after they finish.
-          const gameEnded = await detectGameEnd(matchData, matchId);
+          const gameEnded = await detectGameEnd(matchData, id);
 
           if (gameEnded) {
             send('prediction_start', {});
@@ -137,7 +144,13 @@ export async function GET(request: NextRequest, context: { params: Promise<{ mat
         return;
       }
 
-      void poll();
+      if (matchId === null) {
+        send('error', { message: 'Match not found' });
+        cleanup();
+        return;
+      }
+
+      void poll(matchId);
     },
     cancel() {
       stopStream();

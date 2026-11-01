@@ -11,6 +11,7 @@ vi.mock('@/services/ai/orchestrator', () => ({ runAllPredictions: vi.fn() }));
 
 import { registry } from '@/services/tennis/providers/registry';
 import { ProviderError } from '@/services/tennis/providers/errors';
+import { detectGameEnd } from '@/services/tennis/game-state.service';
 import { GET } from './route';
 
 const mockedGetMatchData = vi.mocked(registry.getMatchById);
@@ -111,6 +112,31 @@ describe('GET /api/stream/[matchId]', () => {
     expect(new TextDecoder().decode(value)).toContain('Poll failed');
     expect(vi.getTimerCount()).toBeGreaterThan(0);
     abort.abort();
+  });
+
+  it('malformed match id sends not found and closes without retry', async () => {
+    const abort = new AbortController();
+    const req = new NextRequest('http://localhost/api/stream/x', { signal: abort.signal });
+    const res = await GET(req, { params: Promise.resolve({ matchId: '%E0' }) });
+    const text = await readAll(res.body!);
+
+    expect(text).toContain('event: error');
+    expect(text).toContain('Match not found');
+    expect(mockedGetMatchData).not.toHaveBeenCalled();
+    expect(vi.getTimerCount()).toBe(0);
+  });
+
+  it('passes the decoded id to detectGameEnd', async () => {
+    mockedGetMatchData
+      .mockResolvedValueOnce({ status: 'live', score: {} } as MatchData)
+      .mockResolvedValue({ status: 'final', score: {} } as MatchData);
+    const abort = new AbortController();
+    const req = new NextRequest('http://localhost/api/stream/x', { signal: abort.signal });
+    const res = await GET(req, { params: Promise.resolve({ matchId: 'apitennis%3A123' }) });
+    const body = readAll(res.body!);
+    await vi.advanceTimersByTimeAsync(1000);
+    await body;
+    expect(vi.mocked(detectGameEnd)).toHaveBeenCalledWith(expect.anything(), 'apitennis:123');
   });
 
   it('decodes the match id before lookup', async () => {

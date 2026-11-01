@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { MatchData, MatchSearchResult } from '@/types/tennis.types';
 import { ProviderError } from './errors';
 import type { ProviderKind, TennisDataProvider } from './types';
@@ -16,7 +16,7 @@ vi.mock('./sportradar.provider', () => ({
 
 import * as health from './health';
 import { recordSnapshot } from './recorder';
-import { createRegistry, parseMatchId } from './registry';
+import { buildDefaultProviders, createRegistry, parseMatchId } from './registry';
 
 let n = 0;
 
@@ -205,5 +205,23 @@ describe('health failures are best-effort', () => {
     const err = new ProviderError(a.id, 'auth', 'bad', 401);
     a.getMatch.mockRejectedValue(err);
     await expect(createRegistry([a]).getMatchById(`${a.id}:1`)).rejects.toBe(err);
+  });
+});
+
+describe('buildDefaultProviders', () => {
+  const saved = process.env.TENNIS_PROVIDERS;
+  afterEach(() => {
+    if (saved === undefined) delete process.env.TENNIS_PROVIDERS;
+    else process.env.TENNIS_PROVIDERS = saved;
+  });
+
+  it('empty TENNIS_PROVIDERS falls back to the default order', () => {
+    process.env.TENNIS_PROVIDERS = '';
+    expect(buildDefaultProviders().map((p) => p.id)).toEqual(['sportradar', 'apitennis', 'replay']);
+  });
+
+  it('honours an explicit list', () => {
+    process.env.TENNIS_PROVIDERS = 'replay, apitennis';
+    expect(buildDefaultProviders().map((p) => p.id)).toEqual(['replay', 'apitennis']);
   });
 });
