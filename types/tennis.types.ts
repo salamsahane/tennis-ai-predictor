@@ -1,11 +1,14 @@
 // types/tennis.types.ts
 // Core data types for tennis match data
 
+import type { SourceInfo } from '@/services/tennis/providers/types';
+
 export interface MatchData {
   id: string;
   status: 'live' | 'final' | 'scheduled';
   tournament: string;
-  surface: 'clay' | 'hard' | 'grass' | 'indoor';
+  surface: 'clay' | 'hard' | 'grass' | 'indoor' | null;
+  source: SourceInfo;
   players: {
     home: Player;
     away: Player;
@@ -25,6 +28,7 @@ export interface MatchData {
     number: number;
     server: 'home' | 'away';
   };
+  gameWinners?: Array<{ set: number; game: number; winner: 'home' | 'away' }>;
 }
 
 export interface Player {
@@ -54,21 +58,21 @@ export interface PeriodScore {
 }
 
 export interface PlayerStats {
-  aces: number;
-  doubleFaults: number;
-  firstServePercentage: number;
-  firstServePointsWon: number;
-  secondServePointsWon: number;
-  secondServePercentage: number;
-  winners: number;
-  unforcedErrors: number;
-  breakPointsWon: number;
-  breakPointsTotal: number;
-  pointsWonLast10: number;
-  serviceGamesWon: number;
-  gamesWon: number;
-  totalPointsWon: number;
-  returnPointsWon: number;
+  aces: number | null;
+  doubleFaults: number | null;
+  firstServePercentage: number | null;
+  firstServePointsWon: number | null;
+  secondServePointsWon: number | null;
+  secondServePercentage: number | null;
+  winners: number | null;
+  unforcedErrors: number | null;
+  breakPointsWon: number | null;
+  breakPointsTotal: number | null;
+  pointsWonLast10: number | null;
+  serviceGamesWon: number | null;
+  gamesWon: number | null;
+  totalPointsWon: number | null;
+  returnPointsWon: number | null;
 }
 
 // SportRadar API response types
@@ -160,4 +164,5 @@ export interface MatchSearchResult {
   away_player: string;
   score: string;
   venue?: string;
+  source: SourceInfo;
 }

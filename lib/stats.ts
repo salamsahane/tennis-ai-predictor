@@ -15,3 +15,8 @@ export function shareOfTotal(home: number, away: number): [number, number] {
   if (total === 0) return [50, 50];
   return [(home / total) * 100, (away / total) * 100];
 }
+
+/** Display a possibly-missing stat; `n/d` when the provider could not supply it. */
+export function formatStat(v: number | null, suffix = ''): string {
+  return v === null ? 'n/d' : `${v}${suffix}`;
+}

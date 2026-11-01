@@ -26,6 +26,7 @@ function makeMatch(overrides: Partial<MatchData> = {}): MatchData {
     status: 'live',
     tournament: 'Roland Garros',
     surface: 'clay',
+    source: { providerId: 'sportradar', label: 'SportRadar', kind: 'live' },
     players: {
       home: { id: 'h', name: 'Sinner, Jannik', country: 'ITA' },
       away: { id: 'a', name: 'Alcaraz, Carlos', country: 'ESP' },
@@ -72,6 +73,14 @@ describe('buildPrompt', () => {
       }),
     );
     expect(prompt).toContain('Aucun set terminé');
+    expect(prompt).not.toMatch(PLACEHOLDER);
+  });
+
+  it('missing stats print n/d', () => {
+    const prompt = buildPrompt(
+      makeMatch({ statistics: { home: { ...stats, aces: null }, away: stats } }),
+    );
+    expect(prompt).toContain('Aces : n/d');
     expect(prompt).not.toMatch(PLACEHOLDER);
   });
 });

@@ -131,6 +131,7 @@ export async function searchLiveMatches(query: string): Promise<MatchSearchResul
         away_player: away?.name || 'Unknown',
         score: scoreDisplay,
         venue: sport_event.venue?.name,
+        source: { providerId: 'sportradar', label: 'SportRadar', kind: 'live' },
       };
     });
 }

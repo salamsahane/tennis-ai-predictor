@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { compareStat, shareOfTotal } from './stats';
+import { compareStat, formatStat, shareOfTotal } from './stats';
 
 describe('compareStat', () => {
   it('higher is better by default', () => {
@@ -25,5 +25,19 @@ describe('shareOfTotal', () => {
 
   it('is even when total is zero', () => {
     expect(shareOfTotal(0, 0)).toEqual([50, 50]);
+  });
+});
+
+describe('formatStat', () => {
+  it('prints n/d for a missing value', () => {
+    expect(formatStat(null)).toBe('n/d');
+  });
+
+  it('appends the suffix', () => {
+    expect(formatStat(65, '%')).toBe('65%');
+  });
+
+  it('keeps zero', () => {
+    expect(formatStat(0)).toBe('0');
   });
 });

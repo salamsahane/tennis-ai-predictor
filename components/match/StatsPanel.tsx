@@ -3,7 +3,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import type { MatchData } from '@/types/tennis.types';
 import { shortName } from '@/lib/utils';
-import { compareStat, shareOfTotal } from '@/lib/stats';
+import { compareStat, formatStat, shareOfTotal } from '@/lib/stats';
 
 interface StatsPanelProps {
   match: MatchData;
@@ -11,12 +11,16 @@ interface StatsPanelProps {
 
 interface StatRowProps {
   label: string;
-  home: number;
-  away: number;
+  home: number | null;
+  away: number | null;
   lowerIsBetter?: boolean;
-  formatHome?: (v: number) => string;
-  formatAway?: (v: number) => string;
+  formatHome?: (v: number | null) => string;
+  formatAway?: (v: number | null) => string;
   isPercentage?: boolean;
+}
+
+function formatBreakPoints(won: number | null, total: number | null): string {
+  return won === null || total === null ? 'n/d' : `${won}/${total}`;
 }
 
 function StatRow({
@@ -24,16 +28,22 @@ function StatRow({
   home,
   away,
   lowerIsBetter = false,
-  formatHome = String,
-  formatAway = String,
+  formatHome = (v) => formatStat(v),
+  formatAway = (v) => formatStat(v),
   isPercentage = false,
 }: StatRowProps) {
-  const better = compareStat(home, away, lowerIsBetter);
+  // Nothing to compare when neither provider supplied this stat.
+  if (home === null && away === null) return null;
+
+  // A missing value counts as 0 for the comparison and the bar, but the cell shows n/d.
+  const homeValue = home ?? 0;
+  const awayValue = away ?? 0;
+  const better = compareStat(homeValue, awayValue, lowerIsBetter);
   const homeBetter = better === 'home';
   const awayBetter = better === 'away';
 
   // Progress bar values (relative to each other for visual comparison)
-  const [p1, p2] = shareOfTotal(home, away);
+  const [p1, p2] = shareOfTotal(homeValue, awayValue);
   const suffix = isPercentage ? '%' : '';
 
   return (
@@ -122,8 +132,8 @@ export function StatsPanel({ match }: StatsPanelProps) {
           label="Balles de break"
           home={home.breakPointsWon}
           away={away.breakPointsWon}
-          formatHome={() => `${home.breakPointsWon}/${home.breakPointsTotal}`}
-          formatAway={() => `${away.breakPointsWon}/${away.breakPointsTotal}`}
+          formatHome={(v) => formatBreakPoints(v, home.breakPointsTotal)}
+          formatAway={(v) => formatBreakPoints(v, away.breakPointsTotal)}
         />
         <StatRow
           label="Pts gagnés (10 dern.)"

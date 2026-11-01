@@ -2,6 +2,7 @@
 // Builds formatted prompts from match data for AI models
 
 import { USER_PROMPT_TEMPLATE } from '@/constants/prompts';
+import { formatStat } from '@/lib/stats';
 import type { MatchData, PeriodScore } from '@/types/tennis.types';
 
 /**
@@ -46,7 +47,9 @@ function buildMomentumAnalysis(matchData: MatchData): string {
   // Recent form (last 10 points)
   const homeLast10 = home.pointsWonLast10;
   const awayLast10 = away.pointsWonLast10;
-  if (homeLast10 > awayLast10) {
+  if (homeLast10 === null || awayLast10 === null) {
+    // Missing stat: skip the line rather than print n/d.
+  } else if (homeLast10 > awayLast10) {
     lines.push(
       `- Momentum récent : ${players.home.name} domine les 10 derniers points (${homeLast10} vs ${awayLast10})`,
     );
@@ -63,7 +66,7 @@ function buildMomentumAnalysis(matchData: MatchData): string {
   // Total points balance
   const totalHome = home.totalPointsWon;
   const totalAway = away.totalPointsWon;
-  if (totalHome + totalAway > 0) {
+  if (totalHome !== null && totalAway !== null && totalHome + totalAway > 0) {
     const homePct = Math.round((totalHome / (totalHome + totalAway)) * 100);
     lines.push(
       `- Balance globale des points : ${players.home.name} ${homePct}% - ${100 - homePct}% ${players.away.name}`,
@@ -71,14 +74,27 @@ function buildMomentumAnalysis(matchData: MatchData): string {
   }
 
   // Winners vs Unforced errors ratio
-  const homeRatio = home.winners - home.unforcedErrors;
-  const awayRatio = away.winners - away.unforcedErrors;
-  lines.push(
-    `- Ratio Winners-Fautes : ${players.home.name} ${homeRatio >= 0 ? '+' : ''}${homeRatio} | ${players.away.name} ${awayRatio >= 0 ? '+' : ''}${awayRatio}`,
-  );
+  if (
+    home.winners !== null &&
+    home.unforcedErrors !== null &&
+    away.winners !== null &&
+    away.unforcedErrors !== null
+  ) {
+    const homeRatio = home.winners - home.unforcedErrors;
+    const awayRatio = away.winners - away.unforcedErrors;
+    lines.push(
+      `- Ratio Winners-Fautes : ${players.home.name} ${homeRatio >= 0 ? '+' : ''}${homeRatio} | ${players.away.name} ${awayRatio >= 0 ? '+' : ''}${awayRatio}`,
+    );
+  }
 
   // Break points pressure
-  if (home.breakPointsTotal > 0 || away.breakPointsTotal > 0) {
+  if (
+    home.breakPointsWon !== null &&
+    home.breakPointsTotal !== null &&
+    away.breakPointsWon !== null &&
+    away.breakPointsTotal !== null &&
+    (home.breakPointsTotal > 0 || away.breakPointsTotal > 0)
+  ) {
     const homeBpPct =
       home.breakPointsTotal > 0
         ? Math.round((home.breakPointsWon / home.breakPointsTotal) * 100)
@@ -140,7 +156,7 @@ export function buildPrompt(matchData: MatchData): string {
 
   const replacements: Record<string, string | number> = {
     tournament_name: tournament,
-    surface: surface,
+    surface: surface ?? 'n/d',
     current_set: `Set ${currentSetNumber}`,
     home_sets: score.sets.home,
     away_sets: score.sets.away,
@@ -158,38 +174,38 @@ export function buildPrompt(matchData: MatchData): string {
 
     // Home player stats
     player_home: players.home.name,
-    aces_home: homeStats.aces,
-    df_home: homeStats.doubleFaults,
-    first_serve_in_home: homeStats.firstServePercentage,
-    first_serve_won_home: homeStats.firstServePointsWon,
-    second_serve_pct_home: homeStats.secondServePercentage,
-    winners_home: homeStats.winners,
-    ufe_home: homeStats.unforcedErrors,
-    bp_won_home: homeStats.breakPointsWon,
-    bp_total_home: homeStats.breakPointsTotal,
-    last10_home: homeStats.pointsWonLast10,
-    service_games_won_home: homeStats.serviceGamesWon,
-    total_points_home: homeStats.totalPointsWon,
-    return_points_home: homeStats.returnPointsWon,
+    aces_home: formatStat(homeStats.aces),
+    df_home: formatStat(homeStats.doubleFaults),
+    first_serve_in_home: formatStat(homeStats.firstServePercentage),
+    first_serve_won_home: formatStat(homeStats.firstServePointsWon),
+    second_serve_pct_home: formatStat(homeStats.secondServePercentage),
+    winners_home: formatStat(homeStats.winners),
+    ufe_home: formatStat(homeStats.unforcedErrors),
+    bp_won_home: formatStat(homeStats.breakPointsWon),
+    bp_total_home: formatStat(homeStats.breakPointsTotal),
+    last10_home: formatStat(homeStats.pointsWonLast10),
+    service_games_won_home: formatStat(homeStats.serviceGamesWon),
+    total_points_home: formatStat(homeStats.totalPointsWon),
+    return_points_home: formatStat(homeStats.returnPointsWon),
 
     // Away player stats
     player_away: players.away.name,
 
     // JSON answer example: the two valid winner names
     player_choice: `${players.home.name} | ${players.away.name}`,
-    aces_away: awayStats.aces,
-    df_away: awayStats.doubleFaults,
-    first_serve_in_away: awayStats.firstServePercentage,
-    first_serve_won_away: awayStats.firstServePointsWon,
-    second_serve_pct_away: awayStats.secondServePercentage,
-    winners_away: awayStats.winners,
-    ufe_away: awayStats.unforcedErrors,
-    bp_won_away: awayStats.breakPointsWon,
-    bp_total_away: awayStats.breakPointsTotal,
-    last10_away: awayStats.pointsWonLast10,
-    service_games_won_away: awayStats.serviceGamesWon,
-    total_points_away: awayStats.totalPointsWon,
-    return_points_away: awayStats.returnPointsWon,
+    aces_away: formatStat(awayStats.aces),
+    df_away: formatStat(awayStats.doubleFaults),
+    first_serve_in_away: formatStat(awayStats.firstServePercentage),
+    first_serve_won_away: formatStat(awayStats.firstServePointsWon),
+    second_serve_pct_away: formatStat(awayStats.secondServePercentage),
+    winners_away: formatStat(awayStats.winners),
+    ufe_away: formatStat(awayStats.unforcedErrors),
+    bp_won_away: formatStat(awayStats.breakPointsWon),
+    bp_total_away: formatStat(awayStats.breakPointsTotal),
+    last10_away: formatStat(awayStats.pointsWonLast10),
+    service_games_won_away: formatStat(awayStats.serviceGamesWon),
+    total_points_away: formatStat(awayStats.totalPointsWon),
+    return_points_away: formatStat(awayStats.returnPointsWon),
   };
 
   let prompt = USER_PROMPT_TEMPLATE;

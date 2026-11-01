@@ -57,6 +57,7 @@ export function normalizeMatchData(summary: SportRadarSummary): MatchData {
           : 'scheduled',
     tournament: sport_event.tournament?.name || 'Unknown Tournament',
     surface: (sport_event.venue?.court_type as MatchData['surface']) || 'hard',
+    source: { providerId: 'sportradar', label: 'SportRadar', kind: 'live' },
     players: {
       home: {
         id: home?.id || '',
