@@ -9,18 +9,17 @@ import { PredictionPanel } from '@/components/predictions/PredictionPanel';
 import { PredictionHistory } from '@/components/predictions/PredictionHistory';
 import { GameHistory } from '@/components/match/GameHistory';
 import { ModelSelector } from '@/components/predictions/ModelSelector';
+import { SourceBadge } from '@/components/match/SourceBadge';
 import { Loader2, ArrowLeft, Wifi, WifiOff } from 'lucide-react';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
 
 export default function MatchPage() {
   const params = useParams();
-  const matchId = params.matchId as string;
-  // SportRadar IDs use a specific format: sr:sport_event:123456
-  const fullMatchId = `sr:sport_event:${matchId}`;
+  // Namespaced id (e.g. sportradar:123), URL-encoded in the path
+  const matchId = decodeURIComponent(params.matchId as string);
 
-  const { matchData, predictions, isPredicting, connectionStatus, error } =
-    useMatchStream(fullMatchId);
+  const { matchData, predictions, isPredicting, connectionStatus, error } = useMatchStream(matchId);
   const { performance, verdictAccuracy, totalPredictions, completedPredictions } =
     usePredictionHistory(predictions);
   const { selectedModels, toggleModel, allModels, isHydrated } = useModelSelection();
@@ -106,9 +105,12 @@ export default function MatchPage() {
           {/* Left Column: Match Data */}
           <div className="space-y-6 lg:col-span-5">
             <section>
-              <h2 className="text-muted-foreground mb-3 px-1 text-sm font-semibold tracking-widest uppercase">
-                Score en direct
-              </h2>
+              <div className="mb-3 flex items-center justify-between gap-2 px-1">
+                <h2 className="text-muted-foreground text-sm font-semibold tracking-widest uppercase">
+                  Score en direct
+                </h2>
+                <SourceBadge source={matchData.source} />
+              </div>
               <LiveScoreBoard match={matchData} />
             </section>
 

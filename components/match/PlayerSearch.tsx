@@ -6,7 +6,8 @@ import { useMatchSearch } from '@/hooks/useMatchSearch';
 import { MatchCard } from '@/components/match/MatchCard';
 
 export function PlayerSearch() {
-  const { inputValue, setInputValue, matches, isLoading, error, hasQueried } = useMatchSearch('');
+  const { inputValue, setInputValue, matches, unavailableSources, isLoading, error, hasQueried } =
+    useMatchSearch('');
 
   return (
     <div className="mx-auto w-full max-w-2xl space-y-6">
@@ -33,6 +34,12 @@ export function PlayerSearch() {
           <div className="bg-destructive/10 text-destructive border-destructive/20 animate-slide-in rounded-lg border p-4 text-center">
             Erreur lors de la recherche des matchs
           </div>
+        )}
+
+        {!error && unavailableSources.length > 0 && (
+          <p className="text-muted-foreground text-center text-xs">
+            Sources indisponibles : {unavailableSources.join(', ')}
+          </p>
         )}
 
         {!isLoading && !error && hasQueried && matches.length === 0 && (

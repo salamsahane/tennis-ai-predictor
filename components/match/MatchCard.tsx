@@ -5,6 +5,7 @@ import { formatPlayerName } from '@/lib/utils';
 import type { MatchSearchResult } from '@/types/tennis.types';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { SourceBadge } from '@/components/match/SourceBadge';
 import { ArrowRight, Trophy, MapPin } from 'lucide-react';
 
 interface MatchCardProps {
@@ -12,11 +13,9 @@ interface MatchCardProps {
 }
 
 export function MatchCard({ match }: MatchCardProps) {
-  const idStr = match.id.split(':').pop();
-
   return (
     <Card className="bg-card/50 hover:bg-card/80 border-primary/20 hover:border-primary/50 group hover:shadow-primary/10 cursor-pointer overflow-hidden shadow-md backdrop-blur-sm transition-all duration-300">
-      <Link href={`/match/${idStr}`} className="block">
+      <Link href={`/match/${encodeURIComponent(match.id)}`} className="block">
         <CardContent className="p-0">
           <div className="flex flex-col items-center justify-between gap-6 p-6 md:flex-row">
             {/* Context Info */}
@@ -28,6 +27,7 @@ export function MatchCard({ match }: MatchCardProps) {
                 >
                   {match.status === 'live' ? '🔴 LIVE' : match.status.toUpperCase()}
                 </Badge>
+                <SourceBadge source={match.source} />
                 <div className="text-muted-foreground flex items-center gap-1.5 text-xs">
                   <Trophy className="h-3.5 w-3.5" />
                   <span

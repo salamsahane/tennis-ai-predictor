@@ -20,15 +20,17 @@ export function useMatchSearch(initialQuery: string = '') {
   // Fetch only when query is >= 3 chars
   const shouldFetch = debouncedQuery.length >= 3;
 
-  const { data, error, isLoading } = useSWR<{ matches: MatchSearchResult[]; total: number }>(
-    shouldFetch ? `/api/search?q=${encodeURIComponent(debouncedQuery)}` : null,
-    fetcher,
-  );
+  const { data, error, isLoading } = useSWR<{
+    matches: MatchSearchResult[];
+    total: number;
+    unavailableSources?: string[];
+  }>(shouldFetch ? `/api/search?q=${encodeURIComponent(debouncedQuery)}` : null, fetcher);
 
   return {
     inputValue,
     setInputValue,
     matches: data?.matches || [],
+    unavailableSources: data?.unavailableSources ?? [],
     isLoading: isLoading && shouldFetch,
     error,
     hasQueried: shouldFetch,

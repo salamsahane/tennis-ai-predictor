@@ -79,6 +79,13 @@ export function useMatchStream(matchId: string | null) {
         if (eventSource) eventSource.close();
       });
 
+      eventSource.addEventListener('source_unavailable', () => {
+        if (!isMounted) return;
+        setError('Source indisponible');
+        setConnectionStatus('disconnected');
+        eventSource?.close();
+      });
+
       eventSource.addEventListener('error', (e) => {
         if (!isMounted) return;
 
