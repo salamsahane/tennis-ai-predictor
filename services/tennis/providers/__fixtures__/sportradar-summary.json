@@ -1,0 +1,66 @@
+{
+  "sport_event": {
+    "id": "sr:sport_event:123",
+    "tournament": { "name": "Paris Masters" },
+    "competitors": [
+      {
+        "id": "sr:competitor:1",
+        "name": "Alcaraz, Carlos",
+        "country_code": "ESP",
+        "qualifier": "home",
+        "seed": 1
+      },
+      {
+        "id": "sr:competitor:2",
+        "name": "Sinner, Jannik",
+        "country_code": "ITA",
+        "qualifier": "away",
+        "seed": 2
+      }
+    ],
+    "venue": { "name": "Accor Arena", "court_type": "hard" }
+  },
+  "sport_event_status": {
+    "status": "live",
+    "match_status": "2nd_set",
+    "home_score": 1,
+    "away_score": 0,
+    "period_scores": [
+      { "home_score": 6, "away_score": 4, "type": "set", "number": 1 },
+      { "home_score": 2, "away_score": 3, "type": "set", "number": 2 }
+    ],
+    "game_state": { "home_score": 30, "away_score": 15, "serving": "away", "tie_break": false }
+  },
+  "statistics": {
+    "totals": {
+      "competitors": [
+        {
+          "id": "sr:competitor:1",
+          "name": "Alcaraz, Carlos",
+          "qualifier": "home",
+          "statistics": {
+            "aces": 5,
+            "double_faults": 1,
+            "first_serve_successful": 30,
+            "first_serve_total": 50,
+            "breakpoints_won": 2,
+            "total_breakpoints": 4
+          }
+        },
+        {
+          "id": "sr:competitor:2",
+          "name": "Sinner, Jannik",
+          "qualifier": "away",
+          "statistics": {
+            "aces": 8,
+            "double_faults": 2,
+            "first_serve_successful": 28,
+            "first_serve_total": 40,
+            "breakpoints_won": 1,
+            "total_breakpoints": 3
+          }
+        }
+      ]
+    }
+  }
+}

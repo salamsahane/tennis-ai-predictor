@@ -1,7 +1,7 @@
 import { type NextRequest } from 'next/server';
 import type { Redis } from '@upstash/redis';
 import { z } from 'zod';
-import { searchLiveMatches } from '@/services/tennis/sportradar.client';
+import { sportradarProvider } from '@/services/tennis/providers/sportradar.provider';
 import { redis, isRealRedis } from '@/lib/redis';
 import { Ratelimit } from '@upstash/ratelimit';
 
@@ -46,7 +46,12 @@ export async function GET(request: NextRequest) {
 
     // 3. Search matches
     const query = validationResult.data.q;
-    const matches = await searchLiveMatches(query);
+    // Temporary inline filter until the registry-based search lands.
+    const terms = query.toLowerCase().split(/\s+/);
+    const matches = (await sportradarProvider.listLiveMatches()).filter((m) => {
+      const names = `${m.home_player} ${m.away_player}`.toLowerCase();
+      return terms.some((term) => names.includes(term));
+    });
 
     return Response.json({
       matches,
