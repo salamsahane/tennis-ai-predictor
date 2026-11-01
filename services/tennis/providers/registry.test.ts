@@ -40,6 +40,7 @@ function fake(
 const m = (id: string) => ({ id }) as unknown as MatchSearchResult;
 
 beforeEach(() => {
+  vi.restoreAllMocks();
   vi.clearAllMocks();
 });
 
@@ -110,6 +111,10 @@ describe('parseMatchId', () => {
     });
   });
 
+  it('throws not_found for unknown provider', () => {
+    expect(() => parseMatchId('nope:1')).toThrow(expect.objectContaining({ kind: 'not_found' }));
+  });
+
   it('throws not_found without a colon', () => {
     expect(() => parseMatchId('bogus')).toThrow(ProviderError);
   });
@@ -170,5 +175,35 @@ describe('registry.getMatchById', () => {
     const spy = vi.spyOn(health, 'isHealthy');
     await createRegistry([a]).getMatchById(`${a.id}:1`);
     expect(spy).not.toHaveBeenCalled();
+  });
+});
+
+describe('health failures are best-effort', () => {
+  it('listLiveMatches survives isHealthy/reportFailure/reportSuccess rejecting', async () => {
+    vi.spyOn(health, 'isHealthy').mockRejectedValue(new Error('redis down'));
+    vi.spyOn(health, 'reportFailure').mockRejectedValue(new Error('redis down'));
+    vi.spyOn(health, 'reportSuccess').mockRejectedValue(new Error('redis down'));
+    const a = fake('live');
+    const b = fake('live', [m('b1')]);
+    const rp = fake('replay', [m('r1')]);
+    a.listLiveMatches.mockRejectedValue(new ProviderError(a.id, 'auth', 'bad', 401));
+    const out = await createRegistry([a, b, rp]).listLiveMatches();
+    expect(a.listLiveMatches).toHaveBeenCalled();
+    expect(out.matches).toEqual([m('b1'), m('r1')]);
+    expect(out.unavailableSources).toEqual([a.label]);
+  });
+
+  it('getMatchById returns data when reportSuccess rejects', async () => {
+    vi.spyOn(health, 'reportSuccess').mockRejectedValue(new Error('redis down'));
+    const a = fake('live');
+    expect(await createRegistry([a]).getMatchById(`${a.id}:1`)).toEqual({ id: 'x' });
+  });
+
+  it('getMatchById rethrows the original error when reportFailure rejects', async () => {
+    vi.spyOn(health, 'reportFailure').mockRejectedValue(new Error('redis down'));
+    const a = fake('live');
+    const err = new ProviderError(a.id, 'auth', 'bad', 401);
+    a.getMatch.mockRejectedValue(err);
+    await expect(createRegistry([a]).getMatchById(`${a.id}:1`)).rejects.toBe(err);
   });
 });

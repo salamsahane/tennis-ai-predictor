@@ -11,12 +11,31 @@ export interface Registry {
   getMatchById(matchId: string): Promise<MatchData | null>;
 }
 
-export function parseMatchId(matchId: string): { providerId: string; nativeId: string } {
+const KNOWN_PROVIDER_IDS = ['sportradar', 'apitennis', 'replay'];
+
+function splitMatchId(matchId: string): { providerId: string; nativeId: string } {
   const i = matchId.indexOf(':');
   if (i <= 0) {
     throw new ProviderError('registry', 'not_found', 'Malformed match id');
   }
   return { providerId: matchId.slice(0, i), nativeId: matchId.slice(i + 1) };
+}
+
+export function parseMatchId(matchId: string): { providerId: string; nativeId: string } {
+  const parsed = splitMatchId(matchId);
+  if (!KNOWN_PROVIDER_IDS.includes(parsed.providerId)) {
+    throw new ProviderError('registry', 'not_found', 'Unknown provider');
+  }
+  return parsed;
+}
+
+// Health is advisory: a Redis outage must never break matches or hide errors.
+async function bestEffort(what: string, fn: () => Promise<unknown>): Promise<void> {
+  try {
+    await fn();
+  } catch {
+    console.warn(`[Registry] health ${what} failed`);
+  }
 }
 
 export function createRegistry(providers: TennisDataProvider[]): Registry {
@@ -31,17 +50,23 @@ export function createRegistry(providers: TennisDataProvider[]): Registry {
       for (const p of providers) {
         if (p.kind !== 'live' || liveDone) continue;
         try {
-          if (!(await isHealthy(p.id))) {
+          let healthy = true;
+          try {
+            healthy = await isHealthy(p.id);
+          } catch {
+            console.warn('[Registry] health check failed, assuming healthy');
+          }
+          if (!healthy) {
             unavailableSources.push(p.label);
             continue;
           }
           const result = await p.listLiveMatches();
-          await reportSuccess(p.id);
+          await bestEffort('reportSuccess', () => reportSuccess(p.id));
           matches.push(...result);
           liveDone = true;
         } catch (err) {
           const e = toProviderError(p.id, err);
-          await reportFailure(e);
+          await bestEffort('reportFailure', () => reportFailure(e));
           logProviderError(e);
           unavailableSources.push(p.label);
         }
@@ -64,7 +89,7 @@ export function createRegistry(providers: TennisDataProvider[]): Registry {
       let nativeId: string;
       let provider: TennisDataProvider | undefined;
       try {
-        ({ providerId, nativeId } = parseMatchId(matchId));
+        ({ providerId, nativeId } = splitMatchId(matchId));
         provider = byId.get(providerId);
         if (!provider) throw new ProviderError('registry', 'not_found', 'Unknown provider');
       } catch {
@@ -73,12 +98,12 @@ export function createRegistry(providers: TennisDataProvider[]): Registry {
 
       try {
         const data = await provider.getMatch(nativeId);
-        await reportSuccess(provider.id);
+        await bestEffort('reportSuccess', () => reportSuccess(provider.id));
         if (data && provider.kind === 'live') await recordSnapshot(matchId, data);
         return data;
       } catch (err) {
         const e = toProviderError(provider.id, err);
-        await reportFailure(e);
+        await bestEffort('reportFailure', () => reportFailure(e));
         if (e.kind === 'not_found') return null;
         throw e;
       }
