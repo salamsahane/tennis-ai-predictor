@@ -28,8 +28,8 @@ function StatRow({
   home,
   away,
   lowerIsBetter = false,
-  formatHome = (v) => formatStat(v),
-  formatAway = (v) => formatStat(v),
+  formatHome,
+  formatAway,
   isPercentage = false,
 }: StatRowProps) {
   // Nothing to compare when neither provider supplied this stat.
@@ -45,6 +45,8 @@ function StatRow({
   // Progress bar values (relative to each other for visual comparison)
   const [p1, p2] = shareOfTotal(homeValue, awayValue);
   const suffix = isPercentage ? '%' : '';
+  const showHome = formatHome ?? ((v: number | null) => formatStat(v, suffix));
+  const showAway = formatAway ?? ((v: number | null) => formatStat(v, suffix));
 
   return (
     <div className="border-border/50 hover:bg-muted/10 flex flex-col rounded-sm border-b px-2 py-3 transition-colors last:border-0">
@@ -52,15 +54,13 @@ function StatRow({
         <span
           className={`font-mono ${homeBetter ? 'text-primary font-bold' : 'text-muted-foreground'}`}
         >
-          {formatHome(home)}
-          {suffix}
+          {showHome(home)}
         </span>
         <span className="text-foreground/80 font-medium">{label}</span>
         <span
           className={`font-mono ${awayBetter ? 'text-primary font-bold' : 'text-muted-foreground'}`}
         >
-          {formatAway(away)}
-          {suffix}
+          {showAway(away)}
         </span>
       </div>
       <div className="flex h-1.5 w-full items-center gap-2">
