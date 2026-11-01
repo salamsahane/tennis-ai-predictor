@@ -62,7 +62,7 @@ export function createReplayProvider(
         const last = m.score.periodScores[m.score.periodScores.length - 1];
         const score = last
           ? `${last.home}-${last.away} (Set ${m.score.periodScores.length})`
-          : '0-0 (Set 1)';
+          : '0-0';
         return {
           id: m.id,
           status: 'live',

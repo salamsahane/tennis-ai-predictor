@@ -1,3 +1,5 @@
+import fs from 'fs';
+import os from 'os';
 import path from 'path';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { createReplayProvider } from './replay.provider';
@@ -23,7 +25,7 @@ describe('replay provider', () => {
   });
 
   it('forces live status', async () => {
-    vi.setSystemTime(20000 + 1);
+    vi.setSystemTime(15000);
     const m = await createReplayProvider({ dir, epoch: 0 }).getMatch('demo-match');
     expect(m?.status).toBe('live');
   });
@@ -50,6 +52,18 @@ describe('replay provider', () => {
       score: '3-2 (Set 1)',
       source: { providerId: 'replay', kind: 'replay' },
     });
+  });
+
+  it('falls back to 0-0 without period scores', async () => {
+    const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'rp-'));
+    const rec = JSON.parse(fs.readFileSync(path.join(dir, 'demo-match.json'), 'utf8'));
+    rec.snapshots.forEach(
+      (s: { data: { score: { periodScores: unknown[] } } }) => (s.data.score.periodScores = []),
+    );
+    fs.writeFileSync(path.join(tmp, 'x.json'), JSON.stringify(rec));
+    vi.setSystemTime(15000);
+    const list = await createReplayProvider({ dir: tmp, epoch: 0 }).listLiveMatches();
+    expect(list[0].score).toBe('0-0');
   });
 
   it('handles a missing dir', async () => {

@@ -103,7 +103,7 @@
       "t": 10000,
       "data": {
         "id": "sr:sport_event:demo",
-        "status": "live",
+        "status": "final",
         "tournament": "Paris Masters",
         "surface": "hard",
         "source": {
