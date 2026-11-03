@@ -12,13 +12,19 @@ import { MODEL_CONFIG } from '@/lib/utils';
 interface PredictionPanelProps {
   latestPrediction: PredictionEvent | null;
   isPredicting: boolean;
+  /** Every model failed for the last finished game */
+  predictionFailed?: boolean;
   matchData: MatchData | null;
   selectedModels?: AIModel[];
 }
 
+const FAILED_MESSAGE =
+  'Aucun modèle d’IA n’a pu répondre pour le dernier jeu. Nouvelle tentative à la fin du jeu suivant.';
+
 export function PredictionPanel({
   latestPrediction,
   isPredicting,
+  predictionFailed = false,
   matchData,
   selectedModels,
 }: PredictionPanelProps) {
@@ -67,6 +73,20 @@ export function PredictionPanel({
     );
   }
 
+  if (!latestPrediction && predictionFailed) {
+    return (
+      <div className="border-destructive/30 flex h-full flex-col items-center justify-center space-y-4 rounded-xl border border-dashed p-12 text-center">
+        <div className="bg-destructive/10 mb-2 flex h-16 w-16 items-center justify-center rounded-full">
+          <span className="text-2xl">⚠️</span>
+        </div>
+        <h3 className="text-foreground text-lg font-medium">Prédiction indisponible</h3>
+        <p role="status" className="text-muted-foreground max-w-sm text-sm">
+          {FAILED_MESSAGE}
+        </p>
+      </div>
+    );
+  }
+
   if (!latestPrediction) {
     return (
       <div className="border-border flex h-full flex-col items-center justify-center space-y-4 rounded-xl border border-dashed p-12 text-center">
@@ -96,6 +116,15 @@ export function PredictionPanel({
           {new Date(latestPrediction.timestamp).toLocaleTimeString()}
         </span>
       </div>
+
+      {predictionFailed && (
+        <p
+          role="status"
+          className="bg-destructive/10 text-destructive border-destructive/20 rounded-lg border px-3 py-2 text-sm"
+        >
+          {FAILED_MESSAGE}
+        </p>
+      )}
 
       <VerdictCard verdict={latestPrediction.verdict} />
 

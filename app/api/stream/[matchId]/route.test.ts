@@ -12,6 +12,7 @@ vi.mock('@/services/ai/orchestrator', () => ({ runAllPredictions: vi.fn() }));
 import { registry } from '@/services/tennis/providers/registry';
 import { ProviderError } from '@/services/tennis/providers/errors';
 import { detectGameEnd } from '@/services/tennis/game-state.service';
+import { runAllPredictions } from '@/services/ai/orchestrator';
 import { GET } from './route';
 
 const mockedGetMatchData = vi.mocked(registry.getMatchById);
@@ -137,6 +138,29 @@ describe('GET /api/stream/[matchId]', () => {
     await vi.advanceTimersByTimeAsync(1000);
     await body;
     expect(vi.mocked(detectGameEnd)).toHaveBeenCalledWith(expect.anything(), 'apitennis:123');
+  });
+
+  it('failed predictions send prediction_failed and keep polling', async () => {
+    vi.mocked(detectGameEnd).mockResolvedValueOnce(true);
+    vi.mocked(runAllPredictions).mockRejectedValueOnce(new Error('All AI prediction calls failed'));
+    mockedGetMatchData.mockResolvedValue({ status: 'live', score: {} } as MatchData);
+    const { abort, res } = open();
+    const reader = (await res).body!.getReader();
+    let text = '';
+    void (async () => {
+      for (;;) {
+        const { done, value } = await reader.read();
+        if (done) return;
+        text += new TextDecoder().decode(value);
+      }
+    })();
+    await flush();
+
+    expect(text).toContain('event: prediction_failed');
+    // A generic `error` event looks like a dropped connection to EventSource
+    expect(text).not.toContain('event: error');
+    expect(vi.getTimerCount()).toBeGreaterThan(0);
+    abort.abort();
   });
 
   it('decodes the match id before lookup', async () => {

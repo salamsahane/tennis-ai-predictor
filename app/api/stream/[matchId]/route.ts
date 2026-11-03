@@ -116,7 +116,8 @@ export async function GET(request: NextRequest, context: { params: Promise<{ mat
               send('prediction_result', result);
             } catch (err) {
               console.error('[Stream] Prediction failed:', err);
-              send('error', { message: 'AI Prediction failed' });
+              // Its own event: a generic `error` looks like a dropped connection
+              send('prediction_failed', {});
             }
           }
 

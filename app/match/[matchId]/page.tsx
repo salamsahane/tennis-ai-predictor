@@ -19,7 +19,8 @@ export default function MatchPage() {
   // Namespaced id (e.g. sportradar:123), URL-encoded in the path
   const matchId = decodeURIComponent(params.matchId as string);
 
-  const { matchData, predictions, isPredicting, connectionStatus, error } = useMatchStream(matchId);
+  const { matchData, predictions, isPredicting, predictionFailed, connectionStatus, error } =
+    useMatchStream(matchId);
   const { performance, verdictAccuracy, totalPredictions, completedPredictions } =
     usePredictionHistory(predictions);
   const { selectedModels, toggleModel, allModels, isHydrated } = useModelSelection();
@@ -136,6 +137,7 @@ export default function MatchPage() {
               <PredictionPanel
                 latestPrediction={latestPrediction}
                 isPredicting={isPredicting}
+                predictionFailed={predictionFailed}
                 matchData={matchData}
                 selectedModels={selectedModels}
               />

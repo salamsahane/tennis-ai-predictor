@@ -10,6 +10,7 @@ export function useMatchStream(matchId: string | null) {
   const [matchData, setMatchData] = useState<MatchData | null>(null);
   const [predictions, setPredictions] = useState<PredictionEvent[]>([]);
   const [isPredicting, setIsPredicting] = useState(false);
+  const [predictionFailed, setPredictionFailed] = useState(false);
   const [connectionStatus, setConnectionStatus] = useState<
     'connecting' | 'connected' | 'disconnected'
   >('disconnected');
@@ -58,6 +59,13 @@ export function useMatchStream(matchId: string | null) {
       eventSource.addEventListener('prediction_start', () => {
         if (!isMounted) return;
         setIsPredicting(true);
+        setPredictionFailed(false);
+      });
+
+      eventSource.addEventListener('prediction_failed', () => {
+        if (!isMounted) return;
+        setIsPredicting(false);
+        setPredictionFailed(true);
       });
 
       eventSource.addEventListener('prediction_result', (e) => {
@@ -72,6 +80,7 @@ export function useMatchStream(matchId: string | null) {
           return [result, ...prev]; // Prepend new predictions
         });
         setIsPredicting(false);
+        setPredictionFailed(false);
       });
 
       eventSource.addEventListener('match_ended', (e) => {
@@ -132,5 +141,5 @@ export function useMatchStream(matchId: string | null) {
     };
   }, [matchId]);
 
-  return { matchData, predictions, isPredicting, connectionStatus, error };
+  return { matchData, predictions, isPredicting, predictionFailed, connectionStatus, error };
 }
