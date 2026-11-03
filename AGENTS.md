@@ -131,7 +131,7 @@ context/                       project knowledge for agents (start at session.md
   - Never print, log, commit or paste the contents of `.env.local`.
   - To check whether a key is set, print its length only.
   - api-tennis puts the key in the URL query string, so never log axios errors, request configs or URLs.
-- **Paid calls:** LLM calls and api-tennis requests cost money or trial quota. Don't trigger them in loops or in tests. When you record matches (`RECORD_MATCHES=1`), blank the LLM keys **for that command only**, and never edit `.env.local` to do it.
+- **Paid calls:** LLM calls (including through the AI gateway) and api-tennis requests cost money or trial quota. **Always ask the user before any paid test or call**, even a single smoke test. Don't trigger them in loops or in tests. When you record matches (`RECORD_MATCHES=1`), blank the LLM keys **for that command only**, and never edit `.env.local` to do it.
 - **Budget:** tennis data stays on trials and free tiers. Don't add paid providers without the user's agreement.
 - **Replay labels:** replays must never be labelled "Live".
 - **Dev server:** don't kill the user's dev server. `next dev` allows one server per folder; if one is running, reuse it. Kill only the processes you started (on Windows, child processes can outlive their task).

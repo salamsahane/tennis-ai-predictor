@@ -74,3 +74,22 @@ These rulings were made during execution and kept after the final review.
 ## Post-3a fix
 
 `prediction_failed` is its own SSE event. The stream used to send a generic `error` event when every model failed. EventSource can't tell that apart from a dropped connection, so the page stayed on "Analyse en cours…" and showed "Reconnexion…". Rule: send custom `error` events only for connection or match-level problems.
+
+## AI gateway (preparatory task 2, 2026-11-03)
+
+Paying three LLM vendors separately was too expensive, so the user asked whether UnoRouter (one balance for many models) could replace the three integrations. The full evaluation, with sources, was a spike and is not committed. What was decided:
+
+- **UnoRouter is rejected for predictions.**
+  - It's a sole proprietorship founded in 2026 that resells third-party capacity at 64–85% below list price.
+  - Its terms say requests can go to unnamed providers and "keyless relays", it publishes no SLA, and it doesn't sell paid GPT-4o.
+  - Since a model may not be the one it claims to be, the per-model accuracy comparison couldn't be trusted, and that comparison is the point of the app.
+- **Vercel AI Gateway is the chosen single credit balance.** OpenRouter is the backup.
+  - It charges list prices with no markup on tokens.
+  - Each request is pinned to the first-party provider, with fallback disabled (`providerOptions.gateway.only`).
+  - Its Anthropic-native `/v1/messages` endpoint lets Claude keep the official Anthropic SDK, with effort and adaptive thinking.
+  - It fits the planned Vercel hosting.
+- **Models come from a catalog, starting on cheaper tiers.** Each model is one entry: vendor, gateway model ID, transport, pinned providers, parameters, verdict weight and UI config. The starting tiers are, for example, Claude Haiku 5.5, Gemini Flash and a smaller GPT, and each can be switched later in its entry.
+  - This replaces the model list hard-coded in 15 files (`AIModel`, `ALL_MODELS`, `MODEL_FETCHERS`, verdict weights, `prediction-stats`, `MODEL_CONFIG`, `PredictionPanel`).
+  - Users still choose which models run.
+- **It's built inside sub-project 3b.** The gateway becomes the transport of 3b's single `callModel` helper, with zod-validated output, so the AI layer is rewritten only once. A direct-vendor transport stays possible for any model.
+- **Cost:** the biggest saving is one poller per match plus a per-game cache, because today each viewer multiplies LLM calls. At list prices, Sonnet, GPT-4o and Gemini Flash cost about $0.025 per predicted game (an estimate, not measured).

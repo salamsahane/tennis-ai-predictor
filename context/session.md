@@ -2,7 +2,7 @@
 
 Read this file first in every new session. It says where the project stands and which context file to open next.
 
-_Last updated: 2026-11-03, after sub-project 3a was merged and pushed (last code commit on `main`: `a69ceaf`)._
+_Last updated: 2026-11-03, after the AI gateway decision (last code commit on `main`: `a69ceaf`)._
 
 ## Snapshot
 
@@ -31,8 +31,12 @@ Tennis AI Predictor is a Next.js 16 app that follows a live tennis match and ask
 
 ## Next steps
 
-1. **Preparatory task 2.** The user will describe it. Wait for them to validate this documentation first.
-2. **Sub-project 3b: prediction pipeline and real accuracy.** Its objectives and prerequisites are in [progress.md § Next: sub-project 3b](progress.md#next-sub-project-3b). Don't start it without the user's go-ahead.
+1. **Sub-project 3b: prediction pipeline, real accuracy and the AI gateway.**
+   - Both preparatory tasks are done:
+     - the context docs;
+     - the UnoRouter evaluation. It was rejected; Vercel AI Gateway was chosen, with a model catalog, built inside 3b. See [decisions.md § AI gateway](decisions.md#ai-gateway-preparatory-task-2-2026-11-03).
+   - The objectives and prerequisites are in [progress.md § Next: sub-project 3b](progress.md#next-sub-project-3b).
+   - Start with the brainstorming skill, and only after the user gives the go-ahead.
 
 ## Where to look next
 

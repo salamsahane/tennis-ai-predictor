@@ -67,11 +67,18 @@ The planned objectives come from the roadmap, the 3a spec's "out of scope" list 
 - **A prediction cache per game:** a game is predicted once, and every viewer gets that result.
 - **Real accuracy:** compare predictions with the real game winners from `MatchData.gameWinners`, filling `actual_winner` and `was_correct` in `PredictionEvent`. Today nothing fills them, so accuracy is always pending.
 - **Validated LLM output:** zod-validated output, a single shared `callModel` helper instead of three near-duplicate services, and normalised player names (verdict votes match names as raw strings).
-- **Possibly:** move `@google/generative-ai` to `@google/genai`, and persist the prediction history (today it lives only in React state).
+- **AI gateway and model catalog** (decided 2026-11-03; see [decisions.md § AI gateway](decisions.md#ai-gateway-preparatory-task-2-2026-11-03)):
+  - Vercel AI Gateway as the transport of `callModel`;
+  - one model catalog replacing the hard-coded model list;
+  - cheaper model tiers to start;
+  - first-party providers pinned, with fallback off;
+  - the model and provider that served each response logged.
+  - With the gateway, `@google/generative-ai` is no longer needed.
+- **Possibly:** persist the prediction history (today it lives only in React state).
 
 Prerequisites and open points for 3b:
 
-- **A working LLM key.** Right now none works; see [session.md](session.md#current-state). Without one, predictions can only be tested with mocks.
+- **Credit on the Vercel AI Gateway.** The user created a key on 2026-11-03 but hasn't added credit yet; they'll do it when paid tests are needed. Until then, predictions can only be tested with mocks. **Always ask the user before any paid test.**
 - **The api-tennis trial:** it's 14 days long and its start date wasn't recorded (around 2026-10-31). Record more matches while it lasts. A longer match **with a tiebreak** is needed to check tiebreak parsing and `gameWinners` across sets.
 - **Game winners from SportRadar and replays:** `gameWinners` is only produced by api-tennis. Replays carry it only because their snapshots were recorded from api-tennis; the committed recording has it for every finished game. SportRadar doesn't produce it.
 
